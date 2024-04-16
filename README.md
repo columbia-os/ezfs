@@ -201,7 +201,9 @@ See `man rename` for details.
 
 Submission
 -------------------------------------
-At this point, you should make sure that whatever robustness tests you did earlier continue to pass with your completed file system, and your tests should include having multiple processes or threads perform various file system operations concurrently. In addition, you should try running various programs manipulating the files in your file system. In your README, note which applications you have used, which ones worked, and which ones do not. What are some file operations supported on your default Linux file system that are not supported by EZFS? Which of these affect the functionality of the programs you ran?
+At this point, you should make sure that whatever robustness tests you did earlier continue to pass with your completed file system, and your tests should include having multiple processes or threads perform various file system operations concurrently. In addition, you should try running various programs manipulating the files in your file system.  
+
+In your README, note which applications you have used, which ones worked, and which ones do not. What are some file operations supported on your default Linux file system that are not supported by EZFS? Which of these affect the functionality of the programs you ran?
 
 To submit this part, push the hw8handin tag with the following:
 ```console
