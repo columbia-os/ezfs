@@ -295,7 +295,7 @@ You should also pass the correct type to `dir_emit()` in `ezfs_iterate()`. Check
 
 Part 7: Reading the contents of regular files
 -------------------------------------
-Add support for reading the contents of files. There are a number of ways to do this, but you should take advantage of generic functions that are already available as part of the VFS to implement read_iter, not read. For example, generic_file_read_iter handles complex logic to read ahead so that file blocks can be cached in memory by the time they are actually needed to avoid blocking on slow I/O devices. However, generic file system functions are unaware of file system-specific functionality for deciding what data blocks are actually associated with each file, so the job of the file system is to provide that information through appropriate functions that will be called by the generic functions. You should read generic_file_read_iter to understand how it interacts with address_space_operations to see what functions need to be implemented. Hint: what is read_folio and how is it used? You may find it particularly helpful to refer to the BFS file system, specifically file.c. What is the functionality or magic of map_bh? Once you have read support, you should be able to do the following:
+Add support for reading the contents of files. There are a number of ways to do this, but you should take advantage of generic functions that are already available as part of the VFS to implement read_iter, not read. For example, generic_file_read_iter handles complex logic to read ahead so that file blocks can be cached in memory by the time they are actually needed to avoid blocking on slow I/O devices. However, generic file system functions are unaware of file system-specific functionality for deciding what data blocks are actually associated with each file, so the job of the file system is to provide that information through appropriate functions that will be called by the generic functions. You should read generic_file_read_iter to understand how it interacts with address_space_operations to see what functions need to be implemented. Hint: what is readpage and how is it used? You may find it particularly helpful to refer to the BFS file system, specifically file.c. What is the functionality or magic of map_bh? Once you have read support, you should be able to do the following:
 
 ```console
         # cat /mnt/ez/hello.txt
@@ -490,8 +490,6 @@ Submission
 -------------------------------------
 At this point, you should make sure that whatever robustness tests you did earlier continue to pass with your completed file system, and your tests should include having multiple processes or threads perform various file system operations concurrently. In addition, you should try running various programs manipulating the files in your file system.  
 
-In your README, note which applications you have used, which ones worked, and which ones do not. What are some file operations supported on your default Linux file system that are not supported by EZFS? Which of these affect the functionality of the programs you ran?
-
 To submit this part, push the hw8handin tag with the following:
 ```console
 $ git tag -a -m "Completed hw8." hw8handin
@@ -509,4 +507,4 @@ It was rewritten by the following TAs in Spring 2024 to be incorporated into the
 -   Alex Jiakai Xu
 
 --------
-*Last updated: 2024-04-16*
+*Last updated: 2024-04-17*
