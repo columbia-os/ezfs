@@ -155,23 +155,23 @@ Part 2: Exploring EZFS
 Now that you understand how to use a loop device, mount a loop device and format it as EZFS. To do the latter, we have provided you with source code for an EZFS formatting program. First create a disk image and assign it to a loop device:
 
 ```console
-        $ dd bs=4096 count=1000 if=/dev/zero of=~/ez_disk.img
-        # losetup --find --show ~/ez_disk.img
+$ dd bs=4096 count=1000 if=/dev/zero of=~/ez_disk.img
+# losetup --find --show ~/ez_disk.img
 ```
 This will create the file `ez_disk.img` and bind it to an available loop device, probably `/dev/loop0`. Now, `/dev/loop0` can be used as if it were a physical disk, and the data backing it will be stored in `ez_disk.img`.
 
 Now format the disk as EZFS. The skeleton code for a formatting utility program is in `format_disk_as_ezfs.c`. Compile it, then run it:
 
 ```console
-        # ./format_disk_as_ezfs /dev/loop0 1000
+# ./format_disk_as_ezfs /dev/loop0 1000
 ```
 
 We have provided you with reference kernel modules that implement EZFS, which are designed to work with your stock Debian 11 kernel (`5.10.205-amd64` and `5.10.205-arm64`). x86 and arm kernel modules are in `ref/ez-x86.ko` and `ref/ez-arm.ko`, respectively. You should familiarize yourself with writing and using [Linux kernel modules](https://cs4118.github.io/dev-guides/linux-modules.html). You can use the reference kernel module to explore your newly created EZFS by mounting the disk and loading the kernel module:
 
 ```console
-        # mkdir /mnt/ez
-        # insmod ez-ARCH.ko
-        # mount -t ezfs /dev/loop0 /mnt/ez
+# mkdir /mnt/ez
+# insmod ez-ARCH.ko
+# mount -t ezfs /dev/loop0 /mnt/ez
 ```
 
 where ARCH is either x86 or arm. Now you can create some new files, edit `hello.txt`, etc. If your kernel name is slightly different (e.g. `5.10.205-amd64`), you may get a versioning error when you try to load the kernel module. In that case, you can try forcibly inserting the module with `insmod -f`.
@@ -230,12 +230,12 @@ In the previous part, you may have created a VFS inode without associating it wi
 Now you can add support for listing the root directory. You should be able to run `ls` and `ls -a`. Note that we do not support listing the contents of a subdirectory yet. Here's sample session:
 
 ```console
-        # ls /mnt/ez
-        hello.txt  subdir
-        # ls -a /mnt/ez
-        .  ..  hello.txt  subdir
-        # ls /mnt/ez/subdir
-        ls: cannot access '/mnt/ez/subdir': No such file or directory
+# ls /mnt/ez
+hello.txt  subdir
+# ls -a /mnt/ez
+.  ..  hello.txt  subdir
+# ls /mnt/ez/subdir
+ls: cannot access '/mnt/ez/subdir': No such file or directory
 ```
 
 The VFS framework will call the `iterate_shared` member of the `struct file_operations`. Inside your `iterate_shared` implementation, use `dir_emit()` to provide VFS with the contents of the requested directory. VFS will continue to call `iterate_shared` until your implementation returns without calling `dir_emit()`. Make sure you implement `iterate_shared`, not `iterate`, as the latter is an older interface. For now, you can pass in `DT_UNKNOWN` as the `type` argument for `dir_emit()`. We will revisit this in the next part. You can use the `ctx->pos` variable as a cursor to the directory entry that you are about to emit. Note that iterating through a directory using `dir_emit()` will list each directory entry contained in the directory, but what should be done to cause the `.` and `..` to appear in the listing? Some file systems accomplish this by actually storing separate entries for `.` and `..` so that they will appear just like any other entry, but other file systems do not, such as the proc file system. Look at how the proc file system achieves this [behavior](https://elixir.bootlin.com/linux/v5.10.138/source/fs/proc/generic.c), and use a similar approach for your EZFS.
@@ -243,15 +243,15 @@ The VFS framework will call the `iterate_shared` member of the `struct file_oper
 The following is an excerpt from the output of `strace ls /usr/bin > /dev/null`:
 
 ```console
-        [...]
-        openat(AT_FDCWD, "/usr/bin", O_RDONLY|O_NONBLOCK|...) = 3
-        [...]
-        getdents64(3, /* 1003 entries */, 32768) = 32744
-        [...]
-        getdents64(3, /* 270 entries */, 32768) = 8888
-        [...]
-        getdents64(3, /* 0 entries */, 32768)   = 0
-        close(3)                                = 0
+[...]
+openat(AT_FDCWD, "/usr/bin", O_RDONLY|O_NONBLOCK|...) = 3
+[...]
+getdents64(3, /* 1003 entries */, 32768) = 32744
+[...]
+getdents64(3, /* 270 entries */, 32768) = 8888
+[...]
+getdents64(3, /* 0 entries */, 32768)   = 0
+close(3)                                = 0
 ```
 
 The `ls` program first opens the `/usr/bin` directory file. Then, it calls `getdents64()` three times to retrieve the list of 1,273 files in `/usr/bin`. Finally, `ls` closes the directory file. Each call to `getdents64()` will result in one call to `iterate_dir()`, which in turn will call your `iterate_shared` implementation. Consequently, your `iterate_shared` implementation should call `dir_emit()` until the given buffer is full.
@@ -265,24 +265,24 @@ Add support for looking up filepaths. You should be able to `cd` into directorie
 
 ```console
 
-        # ls /mnt/ez/subdir
-            names.txt
-        # cd /mnt/ez/subdir
-        # stat names.txt
-          File: names.txt
-          Size: 0           Blocks: 0      IO Block: 4096   regular empty file
-        Device: 700h/1792d  Inode: 4       Links: 1
-        Access: (0000/----------)  Uid: (0 /    root)   Gid: (0 /    root)
-        Access: 2017-03-30 02:42:27.629345430 -0400
-        Modify: 2017-03-30 02:42:27.629345430 -0400
-        Change: 2017-03-30 02:42:27.629345430 -0400
-          Birth: -
-        # stat does_not_exist.txt
-        stat: cannot stat 'does_not_exist.txt': No such file or directory
-        # ls -l ..
-        total 0
-        ---------- 1 root root 0 Apr  3 23:31 hello.txt
-        d--------- 1 root root 0 Dec 31  1969 subdir
+# ls /mnt/ez/subdir
+    names.txt
+# cd /mnt/ez/subdir
+# stat names.txt
+  File: names.txt
+  Size: 0           Blocks: 0      IO Block: 4096   regular empty file
+Device: 700h/1792d  Inode: 4       Links: 1
+Access: (0000/----------)  Uid: (0 /    root)   Gid: (0 /    root)
+Access: 2017-03-30 02:42:27.629345430 -0400
+Modify: 2017-03-30 02:42:27.629345430 -0400
+Change: 2017-03-30 02:42:27.629345430 -0400
+  Birth: -
+# stat does_not_exist.txt
+stat: cannot stat 'does_not_exist.txt': No such file or directory
+# ls -l ..
+total 0
+---------- 1 root root 0 Apr  3 23:31 hello.txt
+d--------- 1 root root 0 Dec 31  1969 subdir
 ```
 
 VFS does most of the heavy lifting when looking up a filepath. To avoid repeated work when looking up similar paths, the kernel maintains a cache called the dentry cache. Learn how the dentry cache works by reading the materials given earlier. A given path is split up into parts and each part is looked up in the dentry cache. If a part isn't in the dentry cache, the VFS will call the file system-specific `lookup` function of `inode_operations` to ask the file system to add it. For example, given a filepath such as `/a/b/c/d/e/f.txt`, once the kernel knows the inode of `c`, it will ask for the inode associated with the name `d` in the directory `c`. If there is no matching dentry in the cache, the lookup function will be called to retrieve the inode for `d` from the filesystem. Before you add things to the dentry cache, you are responsible for determining whether the given parent directory contains an entry with the given name.
@@ -298,22 +298,22 @@ Part 7: Reading the contents of regular files
 Add support for reading the contents of files. There are a number of ways to do this, but you should take advantage of generic functions that are already available as part of the VFS to implement read_iter, not read. For example, generic_file_read_iter handles complex logic to read ahead so that file blocks can be cached in memory by the time they are actually needed to avoid blocking on slow I/O devices. However, generic file system functions are unaware of file system-specific functionality for deciding what data blocks are actually associated with each file, so the job of the file system is to provide that information through appropriate functions that will be called by the generic functions. You should read generic_file_read_iter to understand how it interacts with address_space_operations to see what functions need to be implemented. Hint: what is readpage and how is it used? You may find it particularly helpful to refer to the BFS file system, specifically file.c. What is the functionality or magic of map_bh? Once you have read support, you should be able to do the following:
 
 ```console
-        # cat /mnt/ez/hello.txt
-        Hello world!
-        # cat /mnt/ez/subdir/names.txt
-        Emma Nieh
-        Haruki Gonai
-        Zijian Zhang
-        # dd if=/mnt/ez/hello.txt
-        Hello world!
-        0+1 records in
-        0+1 records out
-        13 bytes copied, 4.5167e-05 s, 266 kB/s
-        # dd if=/mnt/ez/hello.txt bs=1 skip=6
-        world!
-        7+0 records in
-        7+0 records out
-        7 bytes copied, 5.1431e-05 s, 117 kB/s
+# cat /mnt/ez/hello.txt
+Hello world!
+# cat /mnt/ez/subdir/names.txt
+Emma Nieh
+Haruki Gonai
+Zijian Zhang
+# dd if=/mnt/ez/hello.txt
+Hello world!
+0+1 records in
+0+1 records out
+13 bytes copied, 4.5167e-05 s, 266 kB/s
+# dd if=/mnt/ez/hello.txt bs=1 skip=6
+world!
+7+0 records in
+7+0 records out
+7 bytes copied, 5.1431e-05 s, 117 kB/s
 ```
 
 If you try using other programs to read files, you may encounter some errors. For example, vim by default places swap files in the current directory and seeks through them upon opening a file using llseek. You may have noticed an error when trying to open files using vim because your EZFS has no support for llseek yet. Fix it. Hint: there's already a generic implementation in the kernel for llseek.
@@ -331,15 +331,15 @@ So far, we've only been reading what's already on the filesystem. Implement func
 Read generic_file_write_iter, try to understand how it helps us to write iteratively, and find out how it interacts with address_space_operations. Do we need to worry about changing the length of the file ourselves? How about time accounting and inode->i_blocks? It seems that only write_begin and write_end are called in generic_file_write_iter. When is writepage called? What's the benefit of doing so? Referring to BFS's file.c, implement ezfs_writepage and ezfs_write_begin. We recommend you first make sure your write functionality works for a file that requires no more than one data block for its contents. Test for writing the contents of files:
 
 ```console
-        $ cd /mnt/ez
-        $ echo -ne "4118" | dd of=hello.txt bs=1 seek=7 conv=notrunc
-        [...]
-        $ cat hello.txt
-        Hello w4118!
-        $ echo "Greetings and salutations, w4118!" | dd of=hello.txt conv=notrunc
-        [...]
-        $ cat hello.txt
-        Greetings and salutations, w4118!
+$ cd /mnt/ez
+$ echo -ne "4118" | dd of=hello.txt bs=1 seek=7 conv=notrunc
+[...]
+$ cat hello.txt
+Hello w4118!
+$ echo "Greetings and salutations, w4118!" | dd of=hello.txt conv=notrunc
+[...]
+$ cat hello.txt
+Greetings and salutations, w4118!
 ```
 
 Once you have the one block case working, then you should consider what if the file requires more than one block. EZFS only supports index allocation of blocks to a file. As indicated above, the entries in your indirect block should simply be uint64_t stored block numbers. Indirect block entries that are not in use should be zeroed. If either the direct or indirect block entry in the inode are not used, the respective entry should also be zeroed.
@@ -356,31 +356,31 @@ Part 9: Creating new files
 Implement creating new files. That is, user programs should be able to call open() with a mode that includes O_CREAT. Note that an empty file should have 0 data blocks. Here's a sample session:
 
 ```console
-        $ cd /mnt/ez
-        $ ls
-        hello.txt  subdir
-        $ touch world.txt
-        $ ls
-        hello.txt  subdir  world.txt
-        $ stat world.txt
-          File: world.txt
-          Size: 0           Blocks: 0      IO Block: 4096   regular empty file
-        Device: 700h/1792d  Inode: 7       Links: 1
-        Access: (0644/-rw-r--r--)  Uid: ( 1000/     zzj)   Gid: ( 1000/     zzj)
-        Access: 2022-11-16 16:51:03.287875291 -0500
-        Modify: 2022-11-16 16:51:03.287875291 -0500
-        Change: 2022-11-16 16:51:03.287875291 -0500
-          Birth: -
-        $ cat > subdir/favorite_memes.txt
-        doge
-        chad
-        BigTime Tommie
-        https://youtu.be/TiC8pig6PGE  # Ctrl+D to denote EOF
-        $ cat subdir/favorite_memes.txt
-        doge
-        chad
-        BigTime Tommie
-        https://youtu.be/TiC8pig6PGE
+$ cd /mnt/ez
+$ ls
+hello.txt  subdir
+$ touch world.txt
+$ ls
+hello.txt  subdir  world.txt
+$ stat world.txt
+  File: world.txt
+  Size: 0           Blocks: 0      IO Block: 4096   regular empty file
+Device: 700h/1792d  Inode: 7       Links: 1
+Access: (0644/-rw-r--r--)  Uid: ( 1000/     zzj)   Gid: ( 1000/     zzj)
+Access: 2022-11-16 16:51:03.287875291 -0500
+Modify: 2022-11-16 16:51:03.287875291 -0500
+Change: 2022-11-16 16:51:03.287875291 -0500
+  Birth: -
+$ cat > subdir/favorite_memes.txt
+doge
+chad
+BigTime Tommie
+https://youtu.be/TiC8pig6PGE  # Ctrl+D to denote EOF
+$ cat subdir/favorite_memes.txt
+doge
+chad
+BigTime Tommie
+https://youtu.be/TiC8pig6PGE
 ```
 
 
@@ -392,7 +392,7 @@ Review how the VFS dentry and inode caches interact with each other using the re
 You are not required to implement directory removal in this part, that will happen in the next part. Ensure that you are reclaiming data blocks and EZFS inodes when appropriate. To test this, see if you can repeatedly create and remove files.
 
 ```console
-        for i in {1..10}; do touch {1..14}; rm {1..14}; done
+for i in {1..10}; do touch {1..14}; rm {1..14}; done
 ```
 
 In a Unix-like operating system, what is the correct behavior if one process unlinks a file while another process has the same file open? Here's an experiment you can run on ext4 or the EZFS reference implementation to find out:
@@ -413,45 +413,45 @@ Implement deleting directories. User programs should be able to call rmdir() suc
 Here's a sample session:
 
 ```console
-        $ ls -alF
-        total 16
-        drwxrwxrwx 3 zzj  zzj  4096 Nov 16 17:22 ./
-        drwxr-xr-x 3 root root 4096 Nov 16 17:23 ../
-        -rw-rw-rw- 1 zzj  zzj    13 Nov 16 17:22 hello.txt
-        drwxrwxrwx 2 zzj  zzj  4096 Nov 16 17:22 subdir/
-        $ mkdir bigtime
-        $ ls -alF
-        total 20
-        drwxrwxrwx 4 zzj  zzj  4096 Nov 16 17:23 ./
-        drwxr-xr-x 3 root root 4096 Nov 16 17:23 ../
-        drwxr-xr-x 2 zzj  zzj  4096 Nov 16 17:23 bigtime/
-        -rw-rw-rw- 1 zzj  zzj    13 Nov 16 17:22 hello.txt
-        drwxrwxrwx 2 zzj  zzj  4096 Nov 16 17:22 subdir/
-        $ cd bigtime
-        $ touch tommie
-        $ ls -alF
-        total 8
-        drwxr-xr-x 2 zzj zzj 4096 Nov 16 17:24 ./
-        drwxrwxrwx 4 zzj zzj 4096 Nov 16 17:23 ../
-        -rw-r--r-- 1 zzj zzj    0 Nov 16 17:24 tommie
-        $ cd ..
-        $ rmdir bigtime
-        rmdir: failed to remove 'bigtime': Directory not empty
-        $ ls -alF
-        total 20
-        drwxrwxrwx 4 zzj  zzj  4096 Nov 16 17:23 ./
-        drwxr-xr-x 3 root root 4096 Nov 16 17:23 ../
-        drwxr-xr-x 2 zzj  zzj  4096 Nov 16 17:24 bigtime/
-        -rw-rw-rw- 1 zzj  zzj    13 Nov 16 17:22 hello.txt
-        drwxrwxrwx 2 zzj  zzj  4096 Nov 16 17:22 subdir/
-        $ rm bigtime/tommie
-        $ rmdir bigtime
-        $ ls -alF
-        total 16
-        drwxrwxrwx 3 zzj  zzj  4096 Nov 16 17:25 ./
-        drwxr-xr-x 3 root root 4096 Nov 16 17:23 ../
-        -rw-rw-rw- 1 zzj  zzj    13 Nov 16 17:22 hello.txt
-        drwxrwxrwx 2 zzj  zzj  4096 Nov 16 17:22 subdir/
+$ ls -alF
+total 16
+drwxrwxrwx 3 zzj  zzj  4096 Nov 16 17:22 ./
+drwxr-xr-x 3 root root 4096 Nov 16 17:23 ../
+-rw-rw-rw- 1 zzj  zzj    13 Nov 16 17:22 hello.txt
+drwxrwxrwx 2 zzj  zzj  4096 Nov 16 17:22 subdir/
+$ mkdir bigtime
+$ ls -alF
+total 20
+drwxrwxrwx 4 zzj  zzj  4096 Nov 16 17:23 ./
+drwxr-xr-x 3 root root 4096 Nov 16 17:23 ../
+drwxr-xr-x 2 zzj  zzj  4096 Nov 16 17:23 bigtime/
+-rw-rw-rw- 1 zzj  zzj    13 Nov 16 17:22 hello.txt
+drwxrwxrwx 2 zzj  zzj  4096 Nov 16 17:22 subdir/
+$ cd bigtime
+$ touch tommie
+$ ls -alF
+total 8
+drwxr-xr-x 2 zzj zzj 4096 Nov 16 17:24 ./
+drwxrwxrwx 4 zzj zzj 4096 Nov 16 17:23 ../
+-rw-r--r-- 1 zzj zzj    0 Nov 16 17:24 tommie
+$ cd ..
+$ rmdir bigtime
+rmdir: failed to remove 'bigtime': Directory not empty
+$ ls -alF
+total 20
+drwxrwxrwx 4 zzj  zzj  4096 Nov 16 17:23 ./
+drwxr-xr-x 3 root root 4096 Nov 16 17:23 ../
+drwxr-xr-x 2 zzj  zzj  4096 Nov 16 17:24 bigtime/
+-rw-rw-rw- 1 zzj  zzj    13 Nov 16 17:22 hello.txt
+drwxrwxrwx 2 zzj  zzj  4096 Nov 16 17:22 subdir/
+$ rm bigtime/tommie
+$ rmdir bigtime
+$ ls -alF
+total 16
+drwxrwxrwx 3 zzj  zzj  4096 Nov 16 17:25 ./
+drwxr-xr-x 3 root root 4096 Nov 16 17:23 ../
+-rw-rw-rw- 1 zzj  zzj    13 Nov 16 17:22 hello.txt
+drwxrwxrwx 2 zzj  zzj  4096 Nov 16 17:22 subdir/
 ```
 
 Part 12: Compile and run executable files
@@ -461,30 +461,25 @@ Compiling and running executable files requires some additional functionality be
 Here's a sample session:
 
 ```console
-        $ cd /mnt/ez
-        $ vim test.c
-        $ ls
-        hello.txt  subdir  test.c
-        $ cat test.c
-        #include <stdio.h>
+$ cd /mnt/ez
+$ vim test.c
+$ ls
+hello.txt  subdir  test.c
+$ cat test.c
+#include <stdio.h>
 
-        int main() {
-            printf("Hello, World!\n");
-            return 0;
-        }
-        $ gcc test.c
-        $ ls
-        a.out  hello.txt  subdir  test.c
-        $ ./a.out
-        Hello, World!
+int main() {
+    printf("Hello, World!\n");
+    return 0;
+}
+$ gcc test.c
+$ ls
+a.out  hello.txt  subdir  test.c
+$ ./a.out
+Hello, World!
 ```
 
-At this point, you should make sure that whatever robustness tests you did earlier continue to pass with your completed file system, and your tests should include having multiple processes or threads perform various file system operations concurrently. In addition, you should try running various programs manipulating the files in your file system. You should also make sure you test by unmounting and remounting to make sure all your programs manipulating files work correctly with the file data actually written to disk and not just file data in the page cache. In your README, note which applications you have used, which ones worked, and which ones do not. What are some file operations supported on your default Linux file system that are not supported by EZFS? Which of these affect the functionality of the programs you ran?
-
-Part 13: Move files
--------------------------------------
-You might notice that mv works when moving files from another file system to yours, but mv does not work to move files within your file system. Fix this by adding support for `renameat` and `renameat2`, specifically the `RENAME_NOREPLACE` flag.
-See `man rename` for details.
+At this point, you should make sure that whatever robustness tests you did earlier continue to pass with your completed file system, and your tests should include having multiple processes or threads perform various file system operations concurrently. In addition, you should try running various programs manipulating the files in your file system. You should also make sure you test by unmounting and remounting to make sure all your programs manipulating files work correctly with the file data actually written to disk and not just file data in the page cache. In your README, note which applications you have used, which ones worked, and which ones do not. What are some file operations supported on your default Linux file system that are not supported by EZFS? Which of these affects the functionality of the programs you ran?
 
 Submission
 -------------------------------------
