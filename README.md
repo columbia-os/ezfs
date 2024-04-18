@@ -509,12 +509,6 @@ $ git push origin hw8handin
 --------
 ### *Acknowledgment*
 
-The EZFS assignment was previously used by Prof. Jason Nieh in his COMS W4118 Operating Systems I instruction at Columbia University.
-It was rewritten by the following TAs in Spring 2024 to be incorporated into the teaching of Prof. Kostis Kaffes:
-
--   Abhinav Gupta
--   Alex Jiakai Xu
-
 The PantryFS assignment and reference implementation are designed and implemented by the following TAs of COMS W4118 Operating Systems I, Spring 2017, Columbia University:
 
 * Mitchell Gouzenko
@@ -545,6 +539,11 @@ The PantryFS -> EZFS assignement and reference implementation was updated with s
 
 * Emma Nieh
 * Zijian Zhang
+
+It was incorporated by the following TAs in Spring 2024 offering of Operating Systems I taught by Prof. Kostis Kaffes:
+
+-   Abhinav Gupta
+-   Alex Jiakai Xu
 
 --------
 *Last updated: 2024-04-18*
