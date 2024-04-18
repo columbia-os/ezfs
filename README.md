@@ -26,7 +26,7 @@ cd "$(git rev-parse --show-toplevel)" && touch .armpls && git add -f .armpls && 
 Mandatory Survey
 ----------------
 Since this is the last assignment of the semester, **EACH** group member should
-indicate in the README two important pieces of information:
+indicate in the README five important pieces of information:
 1. The number of hours spent on this assignment
 2. A rank ordering of the difficulty of the homework assignments
 3. A rank ordering of how much you learned on each homework assignment
