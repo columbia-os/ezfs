@@ -27,8 +27,13 @@ Mandatory Survey
 ----------------
 Since this is the last assignment of the semester, **EACH** group member should
 indicate in the README two important pieces of information:
-- (1) the number of hours spent on this assignment, and
-- (2) a rank ordering of the difficulty of the homework assignments.
+1. The number of hours spent on this assignment
+2. A rank ordering of the difficulty of the homework assignments
+3. A rank ordering of how much you learned on each homework assignment
+4. The extent to which you agree that this assignment has significantly improved your understanding of file systems (1=strongly disagree, 2=disagree, 3=neutral, 4=agree, 5=strongly agree)
+5. Any comments about your how your educational experience doing this assignment. The format should be EXACTLY as shown below for each group member:
+
+
 
 Here's a recap of this semester's homework
 - HW # 1 Linux-List
@@ -39,10 +44,18 @@ Here's a recap of this semester's homework
 - HW # 7 Farfetch
 - HW # 8 EZFS
 
-For example,
+```console For Example,
+abc123: 15hrs
+
+difficulty: Linux-List < Multi-Server < EZFS < Fridge < Farfetch < Freezer < Tabletop
+
+learned: Linux-List < Multi-Server < EZFS < Fridge < Farfetch < Freezer < Tabletop
+
+rating: 5
+
+comments: any comments here
 ```
-abc123: 15hrs, Linux-List < Multi-Server < EZFS < Fridge < Farfetch < Freezer < Tabletop
-```
+
 would indicate that student with UNI abc123 spent 15 hrs on this assignment and
 that Linux-List was the easiest and Tabletop was the hardest.
 The README should be placed in the top level directory of your team repo.
