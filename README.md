@@ -44,7 +44,8 @@ Here's a recap of this semester's homework
 - HW # 7 Farfetch
 - HW # 8 EZFS
 
-```console For Example,
+```
+For Example,
 abc123: 15hrs
 
 difficulty: Linux-List < Multi-Server < EZFS < Fridge < Farfetch < Freezer < Tabletop
@@ -308,7 +309,7 @@ You should also pass the correct type to `dir_emit()` in `ezfs_iterate()`. Check
 
 Part 7: Reading the contents of regular files
 -------------------------------------
-Add support for reading the contents of files. There are a number of ways to do this, but you should take advantage of generic functions that are already available as part of the VFS to implement read_iter, not read. For example, generic_file_read_iter handles complex logic to read ahead so that file blocks can be cached in memory by the time they are actually needed to avoid blocking on slow I/O devices. However, generic file system functions are unaware of file system-specific functionality for deciding what data blocks are actually associated with each file, so the job of the file system is to provide that information through appropriate functions that will be called by the generic functions. You should read generic_file_read_iter to understand how it interacts with address_space_operations to see what functions need to be implemented. Hint: what is readpage and how is it used? You may find it particularly helpful to refer to the BFS file system, specifically file.c. What is the functionality or magic of map_bh? Once you have read support, you should be able to do the following:
+Add support for reading the contents of files. There are a number of ways to do this, but you should take advantage of generic functions that are already available as part of the VFS to implement `read_iter`, not read. For example, `generic_file_read_iter` handles complex logic to read ahead so that file blocks can be cached in memory by the time they are actually needed to avoid blocking on slow I/O devices. However, generic file system functions are unaware of file system-specific functionality for deciding what data blocks are actually associated with each file, so the job of the file system is to provide that information through appropriate functions that will be called by the generic functions. You should read `generic_file_read_iter` to understand how it interacts with `address_space_operations` to see what functions need to be implemented. Hint: what is `readpage` and how is it used? You may find it particularly helpful to refer to the [BFS file system](http://martin.hinner.info/fs/bfs/bfs-structure.html), specifically [file.c](https://elixir.bootlin.com/linux/v6.1/source/fs/bfs/file.c). What is the functionality or magic of `map_bh`? Once you have read support, you should be able to do the following:
 
 ```console
 # cat /mnt/ez/hello.txt
@@ -329,19 +330,19 @@ world!
 7 bytes copied, 5.1431e-05 s, 117 kB/s
 ```
 
-If you try using other programs to read files, you may encounter some errors. For example, vim by default places swap files in the current directory and seeks through them upon opening a file using llseek. You may have noticed an error when trying to open files using vim because your EZFS has no support for llseek yet. Fix it. Hint: there's already a generic implementation in the kernel for llseek.
+If you try using other programs to read files, you may encounter some errors. For example, `vim` by default places swap files in the current directory and seeks through them upon opening a file using `llseek`. You may have noticed an error when trying to open files using `vim` because your EZFS has no support for `llseek` yet. Fix it. Hint: there's already a generic implementation in the kernel for `llseek`.
 
 At this point, you should stress test your EZFS implementation. The rest of this assignment will be easier if you can depend on the reading functionality to report things correctly. Some of the things you should make sure work include:
 
-* Try copying all the files out of your ez using cp or rsync.
-* Extend the formatting program again to create additional files and a more complex directory structure. Be sure to include different file types and larger files. For example, add a small team photo to the subdir directory.
-* Overwrite the disk with random garbage from /dev/urandom (instead of /dev/zero). Format it. After formatting, the random data should not affect the normal operation of the filesystem.
+* Try copying all the files out of your ez using `cp` or `rsync`.
+* Extend the formatting program again to create additional files and a more complex directory structure. Be sure to include different file types and larger files. For example, add a small team photo to the `subdir` directory.
+* Overwrite the disk with random garbage from `/dev/urandom` (instead of `/dev/zero`). Format it. After formatting, the random data should not affect the normal operation of the filesystem.
 * Write a program that requests invalid offsets when reading files or iterating through directories.
 
 Part 8: Writing to existing files
 -------------------------------------
-So far, we've only been reading what's already on the filesystem. Implement functions for modifying the filesystem contents. Again, you should implement write_iter instead of write.
-Read generic_file_write_iter, try to understand how it helps us to write iteratively, and find out how it interacts with address_space_operations. Do we need to worry about changing the length of the file ourselves? How about time accounting and inode->i_blocks? It seems that only write_begin and write_end are called in generic_file_write_iter. When is writepage called? What's the benefit of doing so? Referring to BFS's file.c, implement ezfs_writepage and ezfs_write_begin. We recommend you first make sure your write functionality works for a file that requires no more than one data block for its contents. Test for writing the contents of files:
+So far, we've only been reading what's already on the filesystem. Implement functions for modifying the filesystem contents. Again, you should implement `write_iter` instead of `write`.
+Read `generic_file_write_iter`, try to understand how it helps us to write iteratively, and find out how it interacts with `address_space_operations`. Do we need to worry about changing the length of the file ourselves? How about time accounting and `inode->i_blocks`? It seems that only `write_begin` and `write_end` are called in `generic_file_write_iter`. When is `writepage` called? What's the benefit of doing so? Referring to BFS's [file.c](https://elixir.bootlin.com/linux/v6.1/source/fs/bfs/file.c), implement `ezfs_writepage` and `ezfs_write_begin`. We recommend you first make sure your write functionality works for a file that requires no more than one data block for its contents. Test for writing the contents of files:
 
 ```console
 $ cd /mnt/ez
@@ -356,17 +357,17 @@ Greetings and salutations, w4118!
 ```
 
 Once you have the one block case working, then you should consider what if the file requires more than one block. EZFS only supports index allocation of blocks to a file. As indicated above, the entries in your indirect block should simply be uint64_t stored block numbers. Indirect block entries that are not in use should be zeroed. If either the direct or indirect block entry in the inode are not used, the respective entry should also be zeroed.
-You should also be able to edit files with the nano editor, although it will complain about fsync() not being implemented. Fix this problem.
+You should also be able to edit files with the `nano` editor, although it will complain about `fsync()` not being implemented. Fix this problem.
 
-Ensure that changes to the VFS inode are written back to disk. You should do this by implementing ezfs_write_inode(). Of course, VFS needs to be informed that the VFS inode is out of sync with the EZFS inode. Test this by unmounting and remounting. Writing to the buffer head only changes the contents in memory. It does not cause those changes to be written back to disk. Be sure to take the appropriate measures so that your modifications are written to disk.
+Ensure that changes to the VFS inode are written back to disk. You should do this by implementing `ezfs_write_inode()`. Of course, VFS needs to be informed that the VFS inode is out of sync with the EZFS inode. Test this by unmounting and remounting. Writing to the buffer head only changes the contents in memory. It does not cause those changes to be written back to disk. Be sure to take the appropriate measures so that your modifications are written to disk.
 
-If there is not enough space in your file system to write what you need to write, you should return an appropriate error, specifically ENOSPC. Keep in mind that there may be multiple reasons why there is not enough space.
+If there is not enough space in your file system to write what you need to write, you should return an appropriate error, specifically [ENOSPC](https://elixir.bootlin.com/linux/v6.1/source/include/uapi/asm-generic/errno-base.h#L32). Keep in mind that there may be multiple reasons why there is not enough space.
 
-Until you introduced writing files, you were not really modifying your file system. Now that the file system is being modified, you should take care to make sure that concurrent file operations are being handled properly, if you have not done so already. For example, if two files are being modified at the same time, you want to make sure that you do not accidentally assign the same free data block to both files, which would obviously be an error. Make sure that your EZFS operations work properly when multiple processes or threads are performing those operations at any given time. Keep in mind that buffer head operations such as sb_bread may block if they need to go to disk. You may find it helpful to review how synchronization is handled in BFS.
+Until you introduced writing files, you were not really modifying your file system. Now that the file system is being modified, you should take care to make sure that concurrent file operations are being handled properly, if you have not done so already. For example, if two files are being modified at the same time, you want to make sure that you do not accidentally assign the same free data block to both files, which would obviously be an error. Make sure that your EZFS operations work properly when multiple processes or threads are performing those operations at any given time. Keep in mind that buffer head operations such as `sb_bread` may block if they need to go to disk. You may find it helpful to review how synchronization is handled in [BFS](https://elixir.bootlin.com/linux/v5.10.138/source/fs/bfs).
 
 Part 9: Creating new files
 -------------------------------------
-Implement creating new files. That is, user programs should be able to call open() with a mode that includes O_CREAT. Note that an empty file should have 0 data blocks. Here's a sample session:
+Implement creating new files. That is, user programs should be able to call `open()` with a mode that includes 'O_CREAT'. ***Note that an empty file should have 0 data blocks.*** Here's a sample session:
 
 ```console
 $ cd /mnt/ez
@@ -400,7 +401,7 @@ https://youtu.be/TiC8pig6PGE
 Part 10: Deleting files
 -------------------------------------
 While testing the previous part, you probably created lots of files that are now cluttering your disk. Let's implement a way to delete those files.
-Review how the VFS dentry and inode caches interact with each other using the resources given earlier in this assignment. Implement the unlink and evict_inode ops so that you can delete files.
+Review how the VFS dentry and inode caches interact with each other using the resources given earlier in this assignment. Implement the `unlink` and `evict_inode` ops so that you can delete files.
 
 You are not required to implement directory removal in this part, that will happen in the next part. Ensure that you are reclaiming data blocks and EZFS inodes when appropriate. To test this, see if you can repeatedly create and remove files.
 
@@ -409,19 +410,19 @@ for i in {1..10}; do touch {1..14}; rm {1..14}; done
 ```
 
 In a Unix-like operating system, what is the correct behavior if one process unlinks a file while another process has the same file open? Here's an experiment you can run on ext4 or the EZFS reference implementation to find out:
-* Create a file named foo.
-* In terminal window A, run tail -f foo. This command will open foo, print out all the contents, and wait for more lines to be written.
-* In terminal B, run cat > foo. This reads from stdin and outputs the result to foo.
-* In terminal C, delete foo.
+* Create a file named `foo`.
+* In terminal window A, run `tail -f foo`. This command will open foo, print out all the contents, and wait for more lines to be written.
+* In terminal B, run `cat > foo`. This reads from stdin and outputs the result to foo.
+* In terminal C, delete `foo`.
 * Back in terminal B, type some text and press return.
 * The text should appear in terminal A.
 
 
 Part 11: Making and removing directories
 -------------------------------------
-Implement creating new directories. That is, user programs should be able to call mkdir(). This should be very similar to what you did to support creating regular files. You need to make sure that you're setting a size and link count appropriate for a directory, rather than a regular file. Hint: consider the link count of the parent directory of the newly created directory as well. In this part as well as the preceding ones, you should make sure that whatever robustness tests you did earlier continue to pass.
+Implement creating new directories. That is, user programs should be able to call `mkdir()`. This should be very similar to what you did to support creating regular files. You need to make sure that you're setting a size and link count appropriate for a directory, rather than a regular file. Hint: consider the link count of the parent directory of the newly created directory as well. In this part as well as the preceding ones, you should make sure that whatever robustness tests you did earlier continue to pass.
 
-Implement deleting directories. User programs should be able to call rmdir() successfully on empty directories. This should be very similar to what you did in the previous part. Take a look at simple_rmdir() for some additional directory-specific steps. Note that simple_empty() is not sufficient to check if a directory is empty for our purposes, because the function simply checks the dentry cache to see if a directory has children. Can you think of a case where this would lead to incorrect behavior?
+Implement deleting directories. User programs should be able to call `rmdir()` successfully on empty directories. This should be very similar to what you did in the previous part. Take a look at `simple_rmdir()` for some additional directory-specific steps. Note that `simple_empty()` is not sufficient to check if a directory is empty for our purposes, because the function simply checks the dentry cache to see if a directory has children. Can you think of a case where this would lead to incorrect behavior?
 
 Here's a sample session:
 
@@ -469,7 +470,7 @@ drwxrwxrwx 2 zzj  zzj  4096 Nov 16 17:22 subdir/
 
 Part 12: Compile and run executable files
 -------------------------------------
-Compiling and running executable files requires some additional functionality beyond what you have already implemented, specifically support for mmap. Given the approach you should have taken thus far, implementing mmap support should be trivial. Do it. At this point, you should now be able to compile and execute programs. This part will also double verify that you implemented the functionality of "read/write/fsync", "create/delete" correctly.
+Compiling and running executable files requires some additional functionality beyond what you have already implemented, specifically support for `mmap`. Given the approach you should have taken thus far, implementing `mmap` support should be trivial. Do it. At this point, you should now be able to compile and execute programs. This part will also double verify that you implemented the functionality of "read/write/fsync", "create/delete" correctly.
 
 Here's a sample session:
 
@@ -514,5 +515,36 @@ It was rewritten by the following TAs in Spring 2024 to be incorporated into the
 -   Abhinav Gupta
 -   Alex Jiakai Xu
 
+The PantryFS assignment and reference implementation are designed and implemented by the following TAs of COMS W4118 Operating Systems I, Spring 2017, Columbia University:
+
+* Mitchell Gouzenko
+* Kevin Chen
+  
+The PantryFS assignment and reference implementation was updated for 64-bit Linux version 4.9.81 by the following TAs of COMS W4118 Operating Systems, Spring 2018, Columbia University:
+
+* John Hui
+  
+The PantryFS assignment and reference implementation was updated for 64-bit Linux version 4.19.50 by the following TAs of COMS W4118 Operating Systems, Spring 2020, Columbia University:
+
+* Hans Montero
+  
+The PantryFS assignment and reference implementation was updated for 64-bit Linux version 5.10.57, along with support for creating directories, removing directories, hard links, and soft links, by the following TAs of COMS W4118 Operating Systems, Fall 2021, Columbia University:
+
+* Xijiao Li
+* Hans Montero
+* Tal Zussman
+
+The PantryFS assignement and reference implementation was updated with support for renaming files (atomically), `mknod`, and `statfs` by the following TAs of COMS W4118 Operating Systems, Spring 2022, Columbia University:
+
+* Eilam Lehrman
+* Xijiao Li
+* Hans Montero
+* Tal Zussman
+
+The PantryFS -> EZFS assignement and reference implementation was updated with support for multiple contiguous data blocks, mmap and thus executable files by the following TAs of COMS W4118 Operating Systems, Fall 2022, Columbia University:
+
+* Emma Nieh
+* Zijian Zhang
+
 --------
-*Last updated: 2024-04-17*
+*Last updated: 2024-04-18*
