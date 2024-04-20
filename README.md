@@ -91,73 +91,78 @@ for this assignment.
 Part 1: Formatting and mounting disks
 -------------------------------------
 
-A loop device is a pseudo-device that makes a file accessible as a block device. Files of this kind are often used for CD ISO images. Mounting a file containing a file system via such a loop mount makes the files within that file system accessible. You will do this with EZFS, but to first gain some experience with a loop device, the following gives you a sample session for creating a loop device and building and mounting an ext2 file system on it. This session starts from the home directory of a user zzj. You should read man pages and search the Internet so you can understand what is going on at each step.
+A loop device is a pseudo-device that makes a file accessible as a block device. Files of this kind are often used for CD ISO images. Mounting a file containing a file system via such a loop mount makes the files within that file system accessible. You will do this with EZFS, but to first gain some experience with a loop device, the following gives you a sample session for creating a loop device and building and mounting an ext2 file system on it. This session starts from the home directory of a user alex. You should read man pages and search the Internet so you can understand what is going on at each step.
 
 ```console
-$ sudo su
-# dd if=/dev/zero of=./ext2.img bs=1024 count=100
+~$ uname -a
+Linux albian 5.10.0-27-arm64 #1 SMP Debian 5.10.205-2 (2023-12-31) aarch64 GNU/Linux
+~$ sudo su
+/home/alex# cd ~
+~# dd if=/dev/zero of=./ext2.img bs=1024 count=100
 100+0 records in
 100+0 records out
-102400 bytes (102 kB, 100 KiB) copied, 0.000600037 s, 171 MB/s
-# modprobe loop
-# losetup --find --show ext2.img
+102400 bytes (102 kB, 100 KiB) copied, 0.000365627 s, 280 MB/s
+~# modprobe loop
+~# losetup --find --show ext2.img
 /dev/loop0
-# mkfs -t ext2 /dev/loop0
-mke2fs 1.44.5 (15-Dec-2018)
+~# mkfs -t ext2 /dev/loop0
+mke2fs 1.46.2 (28-Feb-2021)
 Creating filesystem with 100 1k blocks and 16 inodes
 
-Allocating group tables: done
-Writing inode tables: done
+Allocating group tables: done                            
+Writing inode tables: done                            
 Writing superblocks and filesystem accounting information: done
 
-# mkdir mnt
-# mount /dev/loop0 ./mnt
-# df -hT
+~# mkdir mnt
+~# mount /dev/loop0 ./mnt
+~# df -hT
 Filesystem     Type      Size  Used Avail Use% Mounted on
 ...
 /dev/loop0     ext2       93K   14K   74K  16% /root/mnt
-# cd mnt
-# ls -al
+~# cd mnt
+~/mnt# ls -al
 total 17
-drwxr-xr-x  3 root root  1024 Apr 21 02:22 .
-drwxr-xr-x 37 zzj zzj  4096 Apr 21 02:22 ..
-drwx------  2 root root 12288 Apr 21 02:22 lost+found
-# mkdir sub2
-# ls -al
+drwxr-xr-x 3 root root  1024 Apr 19 20:57 .
+drwx------ 6 root root  4096 Apr 19 20:57 ..
+drwx------ 2 root root 12288 Apr 19 20:57 lost+found
+~/mnt# mkdir sub2
+~/mnt# ls -al
 total 18
-drwxr-xr-x  4 root root  1024 Apr 21 02:23 .
-drwxr-xr-x 37 zzj zzj  4096 Apr 21 02:22 ..
-drwx------  2 root root 12288 Apr 21 02:22 lost+found
-drwxr-xr-x  2 root root  1024 Apr 21 02:23 sub2
-# cd sub2
-# ls -al
+drwxr-xr-x 4 root root  1024 Apr 19 20:58 .
+drwx------ 6 root root  4096 Apr 19 20:57 ..
+drwx------ 2 root root 12288 Apr 19 20:57 lost+found
+drwxr-xr-x 2 root root  1024 Apr 19 20:58 sub2
+~/mnt# cd sub2
+~/mnt/sub2# ls -al
 total 2
-drwxr-xr-x 2 root root 1024 Apr 21 02:23 .
-drwxr-xr-x 4 root root 1024 Apr 21 02:23 ..
-# mkdir sub2.1
-# ls -al
+drwxr-xr-x 2 root root 1024 Apr 19 20:58 .
+drwxr-xr-x 4 root root 1024 Apr 19 20:58 ..
+~/mnt/sub2# mkdir sub2.1
+~/mnt/sub2# ls -al
 total 3
-drwxr-xr-x 3 root root 1024 Apr 21 02:24 .
-drwxr-xr-x 4 root root 1024 Apr 21 02:23 ..
-drwxr-xr-x 2 root root 1024 Apr 21 02:24 sub2.1
-# touch file2.1
-# ls -al
+drwxr-xr-x 3 root root 1024 Apr 19 20:58 .
+drwxr-xr-x 4 root root 1024 Apr 19 20:58 ..
+drwxr-xr-x 2 root root 1024 Apr 19 20:58 sub2.1
+~/mnt/sub2# touch file2.1
+~/mnt/sub2# ls -al
 total 3
-drwxr-xr-x 3 root root 1024 Apr 21 02:24 .
-drwxr-xr-x 4 root root 1024 Apr 21 02:23 ..
--rw-r--r-- 1 root root    0 Apr 21 02:24 file2.1
-drwxr-xr-x 2 root root 1024 Apr 21 02:24 sub2.1
-# cd ../../
-# umount mnt/
-# losetup --find
+drwxr-xr-x 3 root root 1024 Apr 19 20:58 .
+drwxr-xr-x 4 root root 1024 Apr 19 20:58 ..
+-rw-r--r-- 1 root root    0 Apr 19 20:58 file2.1
+drwxr-xr-x 2 root root 1024 Apr 19 20:58 sub2.1
+~/mnt/sub2# cd ../../
+~# umount mnt/
+~# losetup --find
 /dev/loop1
-# losetup --detach /dev/loop0
-# losetup --find
+~# losetup --detach /dev/loop0
+~# losetup --find
 /dev/loop0
-# ls -al mnt/
+~# ls -al mnt/
 total 8
-drwxr-xr-x  2 root root 4096 Apr 21 02:22 .
-drwxr-xr-x 37 zzj zzj 4096 Apr 21 02:22 ..
+drwxr-xr-x 2 root root 4096 Apr 19 20:57 .
+drwx------ 6 root root 4096 Apr 19 20:57 ..
+~# 
+exit
 ```
 
 In the sample session shown above, files and directories are created. Make sure you see the number of links each file or directory has, and make sure you understand why.
@@ -180,7 +185,7 @@ Now format the disk as EZFS. The skeleton code for a formatting utility program 
 # ./format_disk_as_ezfs /dev/loop0 1000
 ```
 
-We have provided you with reference kernel modules that implement EZFS, which are designed to work with your stock Debian 11 kernel (`5.10.205-amd64` and `5.10.205-arm64`). x86 and arm kernel modules are in `ref/ez-x86.ko` and `ref/ez-arm.ko`, respectively. You should familiarize yourself with writing and using [Linux kernel modules](https://cs4118.github.io/dev-guides/linux-modules.html). You can use the reference kernel module to explore your newly created EZFS by mounting the disk and loading the kernel module:
+We have provided you with reference kernel modules that implement EZFS, which are designed to work with your stock Debian 11 kernel (`5.10.205-amd64` and `5.10.205-arm64`). x86 and arm kernel modules are in `ref/ez-x86.ko` and `ref/ez-arm.ko`, respectively. You should familiarize yourself with writing and using [Linux kernel modules](https://columbia-os.github.io/dev-guides/linux-modules.html). You can use the reference kernel module to explore your newly created EZFS by mounting the disk and loading the kernel module:
 
 ```console
 # mkdir /mnt/ez
@@ -214,7 +219,7 @@ Now that you understand how to manually add files to your file system via your f
 * [Documentation/filesystems/vfs.rst](https://elixir.bootlin.com/linux/v6.1/source/Documentation/filesystems/vfs.rst)
 * [Linux VFS tutorial at lwn.net](https://lwn.net/Articles/57369/)
 
-Note that the VFS has evolved over the years and some functions exist primarily for backwards compatibility with older file system implementations. **In your implementation, you should make sure to use the newer VFS interface functions discussed in class whenever possible.** As always, the best source of correct information is the source code, especially other file system implementations, some of which were described in class, including [ramfs](https://elixir.bootlin.com/linux/v6.1/source/fs/ramfs). Other file system implementations are also good references to see what functions you have to implement and which ones you do not have to implement, or can implement by leveraging functions already provided by the VFS.
+Note that the VFS has evolved over the years and some functions exist primarily for backwards compatibility with older file system implementations. **In your implementation, you should make sure to use the newer VFS interface functions discussed in class whenever possible.** As always, the best source of correct information is the source code, especially other file system implementations, some of which were described in class, including [ramfs](https://elixir.bootlin.com/linux/v5.10.205/source/fs/ramfs). Other file system implementations are also good references to see what functions you have to implement and which ones you do not have to implement, or can implement by leveraging functions already provided by the VFS.
 
 This part of the assignment focuses on writing the code that initializes the file system and enables mounting disks. Create the basic functionality for your file system to work as a kernel module so that it can be loaded and unloaded from the kernel. Then make the `mount` and `umount` commands work cleanly. We won't be reading any files or directories at this time.
 
@@ -252,7 +257,7 @@ hello.txt  subdir
 ls: cannot access '/mnt/ez/subdir': No such file or directory
 ```
 
-The VFS framework will call the `iterate_shared` member of the `struct file_operations`. Inside your `iterate_shared` implementation, use `dir_emit()` to provide VFS with the contents of the requested directory. VFS will continue to call `iterate_shared` until your implementation returns without calling `dir_emit()`. Make sure you implement `iterate_shared`, not `iterate`, as the latter is an older interface. For now, you can pass in `DT_UNKNOWN` as the `type` argument for `dir_emit()`. We will revisit this in the next part. You can use the `ctx->pos` variable as a cursor to the directory entry that you are about to emit. Note that iterating through a directory using `dir_emit()` will list each directory entry contained in the directory, but what should be done to cause the `.` and `..` to appear in the listing? Some file systems accomplish this by actually storing separate entries for `.` and `..` so that they will appear just like any other entry, but other file systems do not, such as the proc file system. Look at how the proc file system achieves this [behavior](https://elixir.bootlin.com/linux/v5.10.138/source/fs/proc/generic.c), and use a similar approach for your EZFS.
+The VFS framework will call the `iterate_shared` member of the `struct file_operations`. Inside your `iterate_shared` implementation, use `dir_emit()` to provide VFS with the contents of the requested directory. VFS will continue to call `iterate_shared` until your implementation returns without calling `dir_emit()`. Make sure you implement `iterate_shared`, not `iterate`, as the latter is an older interface. For now, you can pass in `DT_UNKNOWN` as the `type` argument for `dir_emit()`. We will revisit this in the next part. You can use the `ctx->pos` variable as a cursor to the directory entry that you are about to emit. Note that iterating through a directory using `dir_emit()` will list each directory entry contained in the directory, but what should be done to cause the `.` and `..` to appear in the listing? Some file systems accomplish this by actually storing separate entries for `.` and `..` so that they will appear just like any other entry, but other file systems do not, such as the proc file system. Look at how the proc file system achieves this [behavior](https://elixir.bootlin.com/linux/v5.10.205/source/fs/proc/generic.c), and use a similar approach for your EZFS.
 
 The following is an excerpt from the output of `strace ls /usr/bin > /dev/null`:
 
@@ -284,18 +289,18 @@ Add support for looking up filepaths. You should be able to `cd` into directorie
 # cd /mnt/ez/subdir
 # stat names.txt
   File: names.txt
-  Size: 0           Blocks: 0      IO Block: 4096   regular empty file
-Device: 700h/1792d  Inode: 4       Links: 1
+  Size: 0         	Blocks: 0          IO Block: 4096   regular empty file
+Device: 700h/1792d	Inode: 4           Links: 1
 Access: (0000/----------)  Uid: (0 /    root)   Gid: (0 /    root)
-Access: 2017-03-30 02:42:27.629345430 -0400
-Modify: 2017-03-30 02:42:27.629345430 -0400
-Change: 2017-03-30 02:42:27.629345430 -0400
-  Birth: -
+Access: 2024-04-19 22:57:51.953272062 -0400
+Modify: 2024-04-19 22:57:51.953272062 -0400
+Change: 2024-04-19 22:57:51.953272062 -0400
+ Birth: -
 # stat does_not_exist.txt
 stat: cannot stat 'does_not_exist.txt': No such file or directory
 # ls -l ..
 total 0
----------- 1 root root 0 Apr  3 23:31 hello.txt
+---------- 1 root root 0 Apr 19 22:54 hello.txt
 d--------- 1 root root 0 Dec 31  1969 subdir
 ```
 
@@ -309,15 +314,15 @@ You should also pass the correct type to `dir_emit()` in `ezfs_iterate()`. Check
 
 Part 7: Reading the contents of regular files
 -------------------------------------
-Add support for reading the contents of files. There are a number of ways to do this, but you should take advantage of generic functions that are already available as part of the VFS to implement `read_iter`, not read. For example, `generic_file_read_iter` handles complex logic to read ahead so that file blocks can be cached in memory by the time they are actually needed to avoid blocking on slow I/O devices. However, generic file system functions are unaware of file system-specific functionality for deciding what data blocks are actually associated with each file, so the job of the file system is to provide that information through appropriate functions that will be called by the generic functions. You should read `generic_file_read_iter` to understand how it interacts with `address_space_operations` to see what functions need to be implemented. Hint: what is `readpage` and how is it used? You may find it particularly helpful to refer to the [BFS file system](http://martin.hinner.info/fs/bfs/bfs-structure.html), specifically [file.c](https://elixir.bootlin.com/linux/v6.1/source/fs/bfs/file.c). What is the functionality or magic of `map_bh`? Once you have read support, you should be able to do the following:
+Add support for reading the contents of files. There are a number of ways to do this, but you should take advantage of generic functions that are already available as part of the VFS to implement `read_iter`, not read. For example, `generic_file_read_iter` handles complex logic to read ahead so that file blocks can be cached in memory by the time they are actually needed to avoid blocking on slow I/O devices. However, generic file system functions are unaware of file system-specific functionality for deciding what data blocks are actually associated with each file, so the job of the file system is to provide that information through appropriate functions that will be called by the generic functions. You should read `generic_file_read_iter` to understand how it interacts with `address_space_operations` to see what functions need to be implemented. Hint: what is `readpage` and how is it used? You may find it particularly helpful to refer to the [BFS file system](http://martin.hinner.info/fs/bfs/bfs-structure.html), specifically [file.c](https://elixir.bootlin.com/linux/v5.10.205/source/fs/bfs/file.c). What is the functionality or magic of `map_bh`? Once you have read support, you should be able to do the following:
 
 ```console
 # cat /mnt/ez/hello.txt
 Hello world!
 # cat /mnt/ez/subdir/names.txt
-Emma Nieh
-Haruki Gonai
-Zijian Zhang
+Kostis Kaffes
+Abhinav Gupta
+Jiakai Xu
 # dd if=/mnt/ez/hello.txt
 Hello world!
 0+1 records in
@@ -361,9 +366,9 @@ You should also be able to edit files with the `nano` editor, although it will c
 
 Ensure that changes to the VFS inode are written back to disk. You should do this by implementing `ezfs_write_inode()`. Of course, VFS needs to be informed that the VFS inode is out of sync with the EZFS inode. Test this by unmounting and remounting. Writing to the buffer head only changes the contents in memory. It does not cause those changes to be written back to disk. Be sure to take the appropriate measures so that your modifications are written to disk.
 
-If there is not enough space in your file system to write what you need to write, you should return an appropriate error, specifically [ENOSPC](https://elixir.bootlin.com/linux/v6.1/source/include/uapi/asm-generic/errno-base.h#L32). Keep in mind that there may be multiple reasons why there is not enough space.
+If there is not enough space in your file system to write what you need to write, you should return an appropriate error, specifically [ENOSPC](https://elixir.bootlin.com/linux/v5.10.205/source/include/uapi/asm-generic/errno-base.h#L32). Keep in mind that there may be multiple reasons why there is not enough space.
 
-Until you introduced writing files, you were not really modifying your file system. Now that the file system is being modified, you should take care to make sure that concurrent file operations are being handled properly, if you have not done so already. For example, if two files are being modified at the same time, you want to make sure that you do not accidentally assign the same free data block to both files, which would obviously be an error. Make sure that your EZFS operations work properly when multiple processes or threads are performing those operations at any given time. Keep in mind that buffer head operations such as `sb_bread` may block if they need to go to disk. You may find it helpful to review how synchronization is handled in [BFS](https://elixir.bootlin.com/linux/v5.10.138/source/fs/bfs).
+Until you introduced writing files, you were not really modifying your file system. Now that the file system is being modified, you should take care to make sure that concurrent file operations are being handled properly, if you have not done so already. For example, if two files are being modified at the same time, you want to make sure that you do not accidentally assign the same free data block to both files, which would obviously be an error. Make sure that your EZFS operations work properly when multiple processes or threads are performing those operations at any given time. Keep in mind that buffer head operations such as `sb_bread` may block if they need to go to disk. You may find it helpful to review how synchronization is handled in [BFS](https://elixir.bootlin.com/linux/v5.10.205/source/fs/bfs).
 
 Part 9: Creating new files
 -------------------------------------
@@ -378,13 +383,13 @@ $ ls
 hello.txt  subdir  world.txt
 $ stat world.txt
   File: world.txt
-  Size: 0           Blocks: 0      IO Block: 4096   regular empty file
-Device: 700h/1792d  Inode: 7       Links: 1
-Access: (0644/-rw-r--r--)  Uid: ( 1000/     zzj)   Gid: ( 1000/     zzj)
-Access: 2022-11-16 16:51:03.287875291 -0500
-Modify: 2022-11-16 16:51:03.287875291 -0500
-Change: 2022-11-16 16:51:03.287875291 -0500
-  Birth: -
+  Size: 0         	Blocks: 0          IO Block: 4096   regular empty file
+Device: 700h/1792d	Inode: 7           Links: 1
+Access: (0644/-rw-r--r--)  Uid: ( 1000/    alex)   Gid: ( 1000/    alex)
+Access: 2024-04-19 23:03:14.195621482 -0400
+Modify: 2024-04-19 23:03:14.195621482 -0400
+Change: 2024-04-19 23:03:14.195621482 -0400
+ Birth: -
 $ cat > subdir/favorite_memes.txt
 doge
 chad
@@ -429,43 +434,43 @@ Here's a sample session:
 ```console
 $ ls -alF
 total 16
-drwxrwxrwx 3 zzj  zzj  4096 Nov 16 17:22 ./
-drwxr-xr-x 3 root root 4096 Nov 16 17:23 ../
--rw-rw-rw- 1 zzj  zzj    13 Nov 16 17:22 hello.txt
-drwxrwxrwx 2 zzj  zzj  4096 Nov 16 17:22 subdir/
+drwxrwxrwx 3 alex alex 4096 Apr 19 23:10 ./
+drwxr-xr-x 3 root root 4096 Apr 19 23:10 ../
+-rw-rw-rw- 1 alex alex   13 Apr 19 23:10 hello.txt
+drwxrwxrwx 2 alex alex 4096 Apr 19 23:10 subdir/
 $ mkdir bigtime
 $ ls -alF
 total 20
-drwxrwxrwx 4 zzj  zzj  4096 Nov 16 17:23 ./
-drwxr-xr-x 3 root root 4096 Nov 16 17:23 ../
-drwxr-xr-x 2 zzj  zzj  4096 Nov 16 17:23 bigtime/
--rw-rw-rw- 1 zzj  zzj    13 Nov 16 17:22 hello.txt
-drwxrwxrwx 2 zzj  zzj  4096 Nov 16 17:22 subdir/
+drwxrwxrwx 4 alex alex 4096 Apr 19 23:12 ./
+drwxr-xr-x 3 root root 4096 Apr 19 23:10 ../
+drwxr-xr-x 2 alex alex 4096 Apr 19 23:12 bigtime/
+-rw-rw-rw- 1 alex alex   13 Apr 19 23:10 hello.txt
+drwxrwxrwx 2 alex alex 4096 Apr 19 23:10 subdir/
 $ cd bigtime
 $ touch tommie
 $ ls -alF
 total 8
-drwxr-xr-x 2 zzj zzj 4096 Nov 16 17:24 ./
-drwxrwxrwx 4 zzj zzj 4096 Nov 16 17:23 ../
--rw-r--r-- 1 zzj zzj    0 Nov 16 17:24 tommie
+drwxr-xr-x 2 alex alex 4096 Apr 19 23:13 ./
+drwxrwxrwx 4 alex alex 4096 Apr 19 23:12 ../
+-rw-r--r-- 1 alex alex    0 Apr 19 23:13 tommie
 $ cd ..
 $ rmdir bigtime
 rmdir: failed to remove 'bigtime': Directory not empty
 $ ls -alF
 total 20
-drwxrwxrwx 4 zzj  zzj  4096 Nov 16 17:23 ./
-drwxr-xr-x 3 root root 4096 Nov 16 17:23 ../
-drwxr-xr-x 2 zzj  zzj  4096 Nov 16 17:24 bigtime/
--rw-rw-rw- 1 zzj  zzj    13 Nov 16 17:22 hello.txt
-drwxrwxrwx 2 zzj  zzj  4096 Nov 16 17:22 subdir/
+drwxrwxrwx 4 alex alex 4096 Apr 19 23:13 ./
+drwxr-xr-x 3 root root 4096 Apr 19 23:10 ../
+drwxr-xr-x 2 alex alex 4096 Apr 19 23:13 bigtime/
+-rw-rw-rw- 1 alex alex   13 Apr 19 23:10 hello.txt
+drwxrwxrwx 2 alex alex 4096 Apr 19 23:10 subdir/
 $ rm bigtime/tommie
 $ rmdir bigtime
 $ ls -alF
 total 16
-drwxrwxrwx 3 zzj  zzj  4096 Nov 16 17:25 ./
-drwxr-xr-x 3 root root 4096 Nov 16 17:23 ../
--rw-rw-rw- 1 zzj  zzj    13 Nov 16 17:22 hello.txt
-drwxrwxrwx 2 zzj  zzj  4096 Nov 16 17:22 subdir/
+drwxrwxrwx 3 alex alex 4096 Apr 19 23:14 ./
+drwxr-xr-x 3 root root 4096 Apr 19 23:10 ../
+-rw-rw-rw- 1 alex alex   13 Apr 19 23:10 hello.txt
+drwxrwxrwx 2 alex alex 4096 Apr 19 23:10 subdir/
 ```
 
 Part 12: Compile and run executable files
@@ -497,7 +502,7 @@ At this point, you should make sure that whatever robustness tests you did earli
 
 Submission
 -------------------------------------
-At this point, you should make sure that whatever robustness tests you did earlier continue to pass with your completed file system, and your tests should include having multiple processes or threads perform various file system operations concurrently. In addition, you should try running various programs manipulating the files in your file system.  
+At this point, you should make sure that whatever robustness tests you did earlier continue to pass with your completed file system, and your tests should include having multiple processes or threads perform various file system operations concurrently. In addition, you should try running various programs manipulating the files in your file system.
 
 To submit this part, push the hw8handin tag with the following:
 ```console
@@ -546,4 +551,4 @@ It was incorporated by the following TAs in Spring 2024 offering of Operating Sy
 -   Alex Jiakai Xu
 
 --------
-*Last updated: 2024-04-18*
+*Last updated: 2024-04-19*
