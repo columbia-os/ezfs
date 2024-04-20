@@ -289,18 +289,18 @@ Add support for looking up filepaths. You should be able to `cd` into directorie
 # cd /mnt/ez/subdir
 # stat names.txt
   File: names.txt
-  Size: 0           Blocks: 0      IO Block: 4096   regular empty file
-Device: 700h/1792d  Inode: 4       Links: 1
+  Size: 0         	Blocks: 0          IO Block: 4096   regular empty file
+Device: 700h/1792d	Inode: 4           Links: 1
 Access: (0000/----------)  Uid: (0 /    root)   Gid: (0 /    root)
-Access: 2017-03-30 02:42:27.629345430 -0400
-Modify: 2017-03-30 02:42:27.629345430 -0400
-Change: 2017-03-30 02:42:27.629345430 -0400
-  Birth: -
+Access: 2024-04-19 22:57:51.953272062 -0400
+Modify: 2024-04-19 22:57:51.953272062 -0400
+Change: 2024-04-19 22:57:51.953272062 -0400
+ Birth: -
 # stat does_not_exist.txt
 stat: cannot stat 'does_not_exist.txt': No such file or directory
 # ls -l ..
 total 0
----------- 1 root root 0 Apr  3 23:31 hello.txt
+---------- 1 root root 0 Apr 19 22:54 hello.txt
 d--------- 1 root root 0 Dec 31  1969 subdir
 ```
 
@@ -320,9 +320,9 @@ Add support for reading the contents of files. There are a number of ways to do 
 # cat /mnt/ez/hello.txt
 Hello world!
 # cat /mnt/ez/subdir/names.txt
-Emma Nieh
-Haruki Gonai
-Zijian Zhang
+Kostis Kaffes
+Abhinav Gupta
+Jiakai Xu
 # dd if=/mnt/ez/hello.txt
 Hello world!
 0+1 records in
@@ -383,13 +383,13 @@ $ ls
 hello.txt  subdir  world.txt
 $ stat world.txt
   File: world.txt
-  Size: 0           Blocks: 0      IO Block: 4096   regular empty file
-Device: 700h/1792d  Inode: 7       Links: 1
-Access: (0644/-rw-r--r--)  Uid: ( 1000/     zzj)   Gid: ( 1000/     zzj)
-Access: 2022-11-16 16:51:03.287875291 -0500
-Modify: 2022-11-16 16:51:03.287875291 -0500
-Change: 2022-11-16 16:51:03.287875291 -0500
-  Birth: -
+  Size: 0         	Blocks: 0          IO Block: 4096   regular empty file
+Device: 700h/1792d	Inode: 7           Links: 1
+Access: (0644/-rw-r--r--)  Uid: ( 1000/    alex)   Gid: ( 1000/    alex)
+Access: 2024-04-19 23:03:14.195621482 -0400
+Modify: 2024-04-19 23:03:14.195621482 -0400
+Change: 2024-04-19 23:03:14.195621482 -0400
+ Birth: -
 $ cat > subdir/favorite_memes.txt
 doge
 chad
@@ -434,43 +434,43 @@ Here's a sample session:
 ```console
 $ ls -alF
 total 16
-drwxrwxrwx 3 zzj  zzj  4096 Nov 16 17:22 ./
-drwxr-xr-x 3 root root 4096 Nov 16 17:23 ../
--rw-rw-rw- 1 zzj  zzj    13 Nov 16 17:22 hello.txt
-drwxrwxrwx 2 zzj  zzj  4096 Nov 16 17:22 subdir/
+drwxrwxrwx 3 alex alex 4096 Apr 19 23:10 ./
+drwxr-xr-x 3 root root 4096 Apr 19 23:10 ../
+-rw-rw-rw- 1 alex alex   13 Apr 19 23:10 hello.txt
+drwxrwxrwx 2 alex alex 4096 Apr 19 23:10 subdir/
 $ mkdir bigtime
 $ ls -alF
 total 20
-drwxrwxrwx 4 zzj  zzj  4096 Nov 16 17:23 ./
-drwxr-xr-x 3 root root 4096 Nov 16 17:23 ../
-drwxr-xr-x 2 zzj  zzj  4096 Nov 16 17:23 bigtime/
--rw-rw-rw- 1 zzj  zzj    13 Nov 16 17:22 hello.txt
-drwxrwxrwx 2 zzj  zzj  4096 Nov 16 17:22 subdir/
+drwxrwxrwx 4 alex alex 4096 Apr 19 23:12 ./
+drwxr-xr-x 3 root root 4096 Apr 19 23:10 ../
+drwxr-xr-x 2 alex alex 4096 Apr 19 23:12 bigtime/
+-rw-rw-rw- 1 alex alex   13 Apr 19 23:10 hello.txt
+drwxrwxrwx 2 alex alex 4096 Apr 19 23:10 subdir/
 $ cd bigtime
 $ touch tommie
 $ ls -alF
 total 8
-drwxr-xr-x 2 zzj zzj 4096 Nov 16 17:24 ./
-drwxrwxrwx 4 zzj zzj 4096 Nov 16 17:23 ../
--rw-r--r-- 1 zzj zzj    0 Nov 16 17:24 tommie
+drwxr-xr-x 2 alex alex 4096 Apr 19 23:13 ./
+drwxrwxrwx 4 alex alex 4096 Apr 19 23:12 ../
+-rw-r--r-- 1 alex alex    0 Apr 19 23:13 tommie
 $ cd ..
 $ rmdir bigtime
 rmdir: failed to remove 'bigtime': Directory not empty
 $ ls -alF
 total 20
-drwxrwxrwx 4 zzj  zzj  4096 Nov 16 17:23 ./
-drwxr-xr-x 3 root root 4096 Nov 16 17:23 ../
-drwxr-xr-x 2 zzj  zzj  4096 Nov 16 17:24 bigtime/
--rw-rw-rw- 1 zzj  zzj    13 Nov 16 17:22 hello.txt
-drwxrwxrwx 2 zzj  zzj  4096 Nov 16 17:22 subdir/
+drwxrwxrwx 4 alex alex 4096 Apr 19 23:13 ./
+drwxr-xr-x 3 root root 4096 Apr 19 23:10 ../
+drwxr-xr-x 2 alex alex 4096 Apr 19 23:13 bigtime/
+-rw-rw-rw- 1 alex alex   13 Apr 19 23:10 hello.txt
+drwxrwxrwx 2 alex alex 4096 Apr 19 23:10 subdir/
 $ rm bigtime/tommie
 $ rmdir bigtime
 $ ls -alF
 total 16
-drwxrwxrwx 3 zzj  zzj  4096 Nov 16 17:25 ./
-drwxr-xr-x 3 root root 4096 Nov 16 17:23 ../
--rw-rw-rw- 1 zzj  zzj    13 Nov 16 17:22 hello.txt
-drwxrwxrwx 2 zzj  zzj  4096 Nov 16 17:22 subdir/
+drwxrwxrwx 3 alex alex 4096 Apr 19 23:14 ./
+drwxr-xr-x 3 root root 4096 Apr 19 23:10 ../
+-rw-rw-rw- 1 alex alex   13 Apr 19 23:10 hello.txt
+drwxrwxrwx 2 alex alex 4096 Apr 19 23:10 subdir/
 ```
 
 Part 12: Compile and run executable files
