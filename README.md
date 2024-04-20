@@ -502,7 +502,7 @@ At this point, you should make sure that whatever robustness tests you did earli
 
 Submission
 -------------------------------------
-At this point, you should make sure that whatever robustness tests you did earlier continue to pass with your completed file system, and your tests should include having multiple processes or threads perform various file system operations concurrently. In addition, you should try running various programs manipulating the files in your file system.  
+At this point, you should make sure that whatever robustness tests you did earlier continue to pass with your completed file system, and your tests should include having multiple processes or threads perform various file system operations concurrently. In addition, you should try running various programs manipulating the files in your file system.
 
 To submit this part, push the hw8handin tag with the following:
 ```console
@@ -551,4 +551,4 @@ It was incorporated by the following TAs in Spring 2024 offering of Operating Sy
 -   Alex Jiakai Xu
 
 --------
-*Last updated: 2024-04-18*
+*Last updated: 2024-04-19*
