@@ -91,73 +91,78 @@ for this assignment.
 Part 1: Formatting and mounting disks
 -------------------------------------
 
-A loop device is a pseudo-device that makes a file accessible as a block device. Files of this kind are often used for CD ISO images. Mounting a file containing a file system via such a loop mount makes the files within that file system accessible. You will do this with EZFS, but to first gain some experience with a loop device, the following gives you a sample session for creating a loop device and building and mounting an ext2 file system on it. This session starts from the home directory of a user zzj. You should read man pages and search the Internet so you can understand what is going on at each step.
+A loop device is a pseudo-device that makes a file accessible as a block device. Files of this kind are often used for CD ISO images. Mounting a file containing a file system via such a loop mount makes the files within that file system accessible. You will do this with EZFS, but to first gain some experience with a loop device, the following gives you a sample session for creating a loop device and building and mounting an ext2 file system on it. This session starts from the home directory of a user alex. You should read man pages and search the Internet so you can understand what is going on at each step.
 
 ```console
-$ sudo su
-# dd if=/dev/zero of=./ext2.img bs=1024 count=100
+~$ uname -a
+Linux albian 5.10.0-27-arm64 #1 SMP Debian 5.10.205-2 (2023-12-31) aarch64 GNU/Linux
+~$ sudo su
+/home/alex# cd ~
+~# dd if=/dev/zero of=./ext2.img bs=1024 count=100
 100+0 records in
 100+0 records out
-102400 bytes (102 kB, 100 KiB) copied, 0.000600037 s, 171 MB/s
-# modprobe loop
-# losetup --find --show ext2.img
+102400 bytes (102 kB, 100 KiB) copied, 0.000365627 s, 280 MB/s
+~# modprobe loop
+~# losetup --find --show ext2.img
 /dev/loop0
-# mkfs -t ext2 /dev/loop0
-mke2fs 1.44.5 (15-Dec-2018)
+~# mkfs -t ext2 /dev/loop0
+mke2fs 1.46.2 (28-Feb-2021)
 Creating filesystem with 100 1k blocks and 16 inodes
 
-Allocating group tables: done
-Writing inode tables: done
+Allocating group tables: done                            
+Writing inode tables: done                            
 Writing superblocks and filesystem accounting information: done
 
-# mkdir mnt
-# mount /dev/loop0 ./mnt
-# df -hT
+~# mkdir mnt
+~# mount /dev/loop0 ./mnt
+~# df -hT
 Filesystem     Type      Size  Used Avail Use% Mounted on
 ...
 /dev/loop0     ext2       93K   14K   74K  16% /root/mnt
-# cd mnt
-# ls -al
+~# cd mnt
+~/mnt# ls -al
 total 17
-drwxr-xr-x  3 root root  1024 Apr 21 02:22 .
-drwxr-xr-x 37 zzj zzj  4096 Apr 21 02:22 ..
-drwx------  2 root root 12288 Apr 21 02:22 lost+found
-# mkdir sub2
-# ls -al
+drwxr-xr-x 3 root root  1024 Apr 19 20:57 .
+drwx------ 6 root root  4096 Apr 19 20:57 ..
+drwx------ 2 root root 12288 Apr 19 20:57 lost+found
+~/mnt# mkdir sub2
+~/mnt# ls -al
 total 18
-drwxr-xr-x  4 root root  1024 Apr 21 02:23 .
-drwxr-xr-x 37 zzj zzj  4096 Apr 21 02:22 ..
-drwx------  2 root root 12288 Apr 21 02:22 lost+found
-drwxr-xr-x  2 root root  1024 Apr 21 02:23 sub2
-# cd sub2
-# ls -al
+drwxr-xr-x 4 root root  1024 Apr 19 20:58 .
+drwx------ 6 root root  4096 Apr 19 20:57 ..
+drwx------ 2 root root 12288 Apr 19 20:57 lost+found
+drwxr-xr-x 2 root root  1024 Apr 19 20:58 sub2
+~/mnt# cd sub2
+~/mnt/sub2# ls -al
 total 2
-drwxr-xr-x 2 root root 1024 Apr 21 02:23 .
-drwxr-xr-x 4 root root 1024 Apr 21 02:23 ..
-# mkdir sub2.1
-# ls -al
+drwxr-xr-x 2 root root 1024 Apr 19 20:58 .
+drwxr-xr-x 4 root root 1024 Apr 19 20:58 ..
+~/mnt/sub2# mkdir sub2.1
+~/mnt/sub2# ls -al
 total 3
-drwxr-xr-x 3 root root 1024 Apr 21 02:24 .
-drwxr-xr-x 4 root root 1024 Apr 21 02:23 ..
-drwxr-xr-x 2 root root 1024 Apr 21 02:24 sub2.1
-# touch file2.1
-# ls -al
+drwxr-xr-x 3 root root 1024 Apr 19 20:58 .
+drwxr-xr-x 4 root root 1024 Apr 19 20:58 ..
+drwxr-xr-x 2 root root 1024 Apr 19 20:58 sub2.1
+~/mnt/sub2# touch file2.1
+~/mnt/sub2# ls -al
 total 3
-drwxr-xr-x 3 root root 1024 Apr 21 02:24 .
-drwxr-xr-x 4 root root 1024 Apr 21 02:23 ..
--rw-r--r-- 1 root root    0 Apr 21 02:24 file2.1
-drwxr-xr-x 2 root root 1024 Apr 21 02:24 sub2.1
-# cd ../../
-# umount mnt/
-# losetup --find
+drwxr-xr-x 3 root root 1024 Apr 19 20:58 .
+drwxr-xr-x 4 root root 1024 Apr 19 20:58 ..
+-rw-r--r-- 1 root root    0 Apr 19 20:58 file2.1
+drwxr-xr-x 2 root root 1024 Apr 19 20:58 sub2.1
+~/mnt/sub2# cd ../../
+~# umount mnt/
+~# losetup --find
 /dev/loop1
-# losetup --detach /dev/loop0
-# losetup --find
+~# losetup --detach /dev/loop0
+~# losetup --find
 /dev/loop0
-# ls -al mnt/
+~# ls -al mnt/
 total 8
-drwxr-xr-x  2 root root 4096 Apr 21 02:22 .
-drwxr-xr-x 37 zzj zzj 4096 Apr 21 02:22 ..
+drwxr-xr-x 2 root root 4096 Apr 19 20:57 .
+drwx------ 6 root root 4096 Apr 19 20:57 ..
+~# 
+exit
 ```
 
 In the sample session shown above, files and directories are created. Make sure you see the number of links each file or directory has, and make sure you understand why.
