@@ -2,6 +2,12 @@
 EZFS
 ======
 
+<div align='center'>
+    <img src='./Red_on_computer.png' alt="Red Pokemon" width="50%">
+    <br>
+    Gotta File 'Em All: Managing Your Pokémon Data with Precision!
+</div>
+
 Submission
 ----------
 
