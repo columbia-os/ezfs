@@ -50,13 +50,14 @@ Here's a recap of this semester's homework
 - HW # 7 Farfetch
 - HW # 8 EZFS
 
+For example,
+
 ```
-For Example,
 abc123: 15hrs
 
 difficulty: Linux-List < Multi-Server < EZFS < Fridge < Farfetch < Freezer < Tabletop
 
-learned: Linux-List < Multi-Server < EZFS < Fridge < Farfetch < Freezer < Tabletop
+learned: Multi-Server < Linux-List < Tabletop < EZFS < Farfetch < Freezer < Fridge
 
 rating: 5
 
@@ -64,7 +65,9 @@ comments: any comments here
 ```
 
 would indicate that student with UNI abc123 spent 15 hrs on this assignment and
-that Linux-List was the easiest and Tabletop was the hardest.
+that Linux-List was the easiest and Tabletop was the hardest,
+learned the least on Multi-Server and most on Fridge,
+and strongly agree that this assignment significantly improved abc123's understanding of file systems. 
 The README should be placed in the top level directory of your team repo.
 5 points for this assignment will be allocated to grading your README.
 
