@@ -523,41 +523,15 @@ $ git push origin hw8handin
 --------
 ### *Acknowledgment*
 
-The PantryFS assignment and reference implementation are designed and implemented by the following TAs of COMS W4118 Operating Systems I, Spring 2017, Columbia University:
-
-* Mitchell Gouzenko
-* Kevin Chen
-  
-The PantryFS assignment and reference implementation was updated for 64-bit Linux version 4.9.81 by the following TAs of COMS W4118 Operating Systems, Spring 2018, Columbia University:
-
-* John Hui
-  
-The PantryFS assignment and reference implementation was updated for 64-bit Linux version 4.19.50 by the following TAs of COMS W4118 Operating Systems, Spring 2020, Columbia University:
-
-* Hans Montero
-  
-The PantryFS assignment and reference implementation was updated for 64-bit Linux version 5.10.57, along with support for creating directories, removing directories, hard links, and soft links, by the following TAs of COMS W4118 Operating Systems, Fall 2021, Columbia University:
-
-* Xijiao Li
-* Hans Montero
-* Tal Zussman
-
-The PantryFS assignement and reference implementation was updated with support for renaming files (atomically), `mknod`, and `statfs` by the following TAs of COMS W4118 Operating Systems, Spring 2022, Columbia University:
-
-* Eilam Lehrman
-* Xijiao Li
-* Hans Montero
-* Tal Zussman
-
-The PantryFS -> EZFS assignement and reference implementation was updated with support for multiple contiguous data blocks, mmap and thus executable files by the following TAs of COMS W4118 Operating Systems, Fall 2022, Columbia University:
+The ezFS assignment and reference implementation were designed and implemented by the following TAs of COMS W4118 Operating Systems I, Fall 2022, Columbia University:
 
 * Emma Nieh
 * Zijian Zhang
 
-It was incorporated by the following TAs in Spring 2024 offering of Operating Systems I taught by Prof. Kostis Kaffes:
+It was incorporated by the following TAs in the Spring 2024 offering of Operating Systems I taught by Prof. Kostis Kaffes:
 
 -   Abhinav Gupta
 -   Alex Jiakai Xu
 
 --------
-*Last updated: 2024-04-19*
+*Last updated: 2024-04-23*
