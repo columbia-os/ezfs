@@ -223,7 +223,7 @@ Now that you understand how to manually add files to your file system via your f
 * LKD chapter 13
 * LKD chapter 14: pages 289 - 294
 * LKD chapter 16: pages 326 - 331
-* [Page cache overview slides](https://nieh.net/teaching/w4118/homeworks/hmwk6/page-cache-overview.pdf)
+* [Page cache overview slides](./page-cache-overview.pdf)
 * [Linux Kernel Internals chapter 3 (Virtual Filesystem)](http://www.tldp.org/LDP/lki/lki-3.html)
 * [Documentation/filesystems/vfs.rst](https://elixir.bootlin.com/linux/v6.1/source/Documentation/filesystems/vfs.rst)
 * [Linux VFS tutorial at lwn.net](https://lwn.net/Articles/57369/)
@@ -534,4 +534,4 @@ It was incorporated by the following TAs in the Spring 2024 offering of Operatin
 -   Alex Jiakai Xu
 
 --------
-*Last updated: 2024-04-23*
+*Last updated: 2024-04-26*
