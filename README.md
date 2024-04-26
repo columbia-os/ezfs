@@ -238,7 +238,7 @@ Some Hints:
 
 * Use `sb_set_blocksize()` to ensure that the block layer reads blocks of the correct size.
 
-* Read the EZFS superblock and inodes. Assign them to an instance of `struct ezfs_sb_buffer_heads`. Store this struct in the `s_fs_info` member of the VFS superblock. This way, we can always find the EZFS superblock and inodes by following the trail of pointers from the VFS superblock. [EZFS fill_super](https://nieh.net/teaching/w4118/homeworks/hmwk6/ezfs-superblock.pdf) shows the relationship between these structs after the the superblock is read from disk and its in-memory representation is initialized.
+* Read the EZFS superblock and inodes. Assign them to an instance of `struct ezfs_sb_buffer_heads`. Store this struct in the `s_fs_info` member of the VFS superblock. This way, we can always find the EZFS superblock and inodes by following the trail of pointers from the VFS superblock. [EZFS fill_super](./ezfs-superblock.pdf) shows the relationship between these structs after the the superblock is read from disk and its in-memory representation is initialized.
 
 * You will have to fill out some additional members of the VFS superblock structure, such as the magic number and pointer to the ops struct.
 
