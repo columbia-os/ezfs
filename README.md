@@ -232,7 +232,7 @@ Note that the VFS has evolved over the years and some functions exist primarily 
 
 This part of the assignment focuses on writing the code that initializes the file system and enables mounting disks. Create the basic functionality for your file system to work as a kernel module so that it can be loaded and unloaded from the kernel. Then make the `mount` and `umount` commands work cleanly. We won't be reading any files or directories at this time.
 
-The name attribute of your `struct file_system_type` MUST BE **myezfs**. _Failure to provide the correct naming of your file system will result in an automatic zero on your grade._
+The name attribute of your `struct file_system_type` MUST BE **myezfs or ezfs**. _Failure to provide the correct naming of your file system will result in an automatic zero on your grade._
 
 Some Hints:
 
