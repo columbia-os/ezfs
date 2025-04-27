@@ -43,21 +43,21 @@ indicate in the README five important pieces of information:
 
 Here's a recap of this semester's homework
 - HW # 1 Linux-List
-- HW # 3 Multi-Server
-- HW # 4 Tabletop
-- HW # 5 Fridge
-- HW # 6 Freezer
-- HW # 7 Farfetch
-- HW # 8 EZFS
+- HW # 2 Simple-Shell
+- HW # 3 Tabletop
+- HW # 4 Fridge
+- HW # 5 Freezer
+- HW # 6 Farfetch
+- HW # 7 EZFS
 
 For example,
 
 ```
 abc123: 15hrs
 
-difficulty: Linux-List < Multi-Server < EZFS < Fridge < Farfetch < Freezer < Tabletop
+difficulty: Linux-List < Shellder < EZFS < Fridge < Farfetch < Freezer < Tabletop
 
-learned: Multi-Server < Linux-List < Tabletop < EZFS < Farfetch < Freezer < Fridge
+learned: Shellder < Linux-List < Tabletop < EZFS < Farfetch < Freezer < Fridge
 
 rating: 5
 
@@ -66,7 +66,7 @@ comments: any comments here
 
 would indicate that student with UNI abc123 spent 15 hrs on this assignment and
 that Linux-List was the easiest and Tabletop was the hardest,
-learned the least on Multi-Server and most on Fridge,
+learned the least on Shellder and most on Fridge,
 and strongly agree that this assignment significantly improved abc123's understanding of file systems. 
 The README should be placed in the top level directory of your team repo.
 5 points for this assignment will be allocated to grading your README.
@@ -91,87 +91,79 @@ In this assignment, you will write your own disk-based file system, EZFS.
 You will learn how to use a loop device to turn a regular file into a block
 storage device, then format that device into an EZFS file system.
 Then you will use EZFS to access the file system.
-EZFS will be built as a kernel module that you can load into the stock
-**Debian 11.6** kernel in your VM.
-You do NOT need to use the 4118 kernel you built for previous homework
-assignments and there is no need to build the entire Linux kernel tree
-for this assignment.
+EZFS will be built as a kernel module that you can load into the **stock Ubuntu 24.04.1** kernel in your VM.
+You do NOT need to use the 4118 kernel you built for previous homework assignments and there is no need to build the entire Linux kernel tree for this assignment.
 
 Part 1: Formatting and mounting disks
 -------------------------------------
 
 A loop device is a pseudo-device that makes a file accessible as a block device. Files of this kind are often used for CD ISO images. Mounting a file containing a file system via such a loop mount makes the files within that file system accessible. You will do this with EZFS, but to first gain some experience with a loop device, the following gives you a sample session for creating a loop device and building and mounting an ext2 file system on it. This session starts from the home directory of a user alex. You should read man pages and search the Internet so you can understand what is going on at each step.
 
-```console
-~$ uname -a
-Linux albian 5.10.0-27-arm64 #1 SMP Debian 5.10.205-2 (2023-12-31) aarch64 GNU/Linux
-~$ sudo su
-/home/alex# cd ~
-~# dd if=/dev/zero of=./ext2.img bs=1024 count=100
-100+0 records in
-100+0 records out
-102400 bytes (102 kB, 100 KiB) copied, 0.000365627 s, 280 MB/s
-~# modprobe loop
-~# losetup --find --show ext2.img
-/dev/loop0
-~# mkfs -t ext2 /dev/loop0
-mke2fs 1.46.2 (28-Feb-2021)
-Creating filesystem with 100 1k blocks and 16 inodes
+```
+ $ sudo su
+        # dd if=/dev/zero of=./ext2.img bs=1024 count=104
+        104+0 records in
+        104+0 records out
+        106496 bytes (106 kB, 104 KiB) copied, 0.000600037 s, 171 MB/s
+        # modprobe loop
+        # losetup --find --show ext2.img
+        /dev/loop0
+        # mkfs -t ext2 /dev/loop0
+        mke2fs 1.47.0 (5-Feb-2023)
+        Creating filesystem with 104 1k blocks and 16 inodes
 
-Allocating group tables: done                            
-Writing inode tables: done                            
-Writing superblocks and filesystem accounting information: done
+        Allocating group tables: done                            
+        Writing inode tables: done                            
+        Writing superblocks and filesystem accounting information: done
 
-~# mkdir mnt
-~# mount /dev/loop0 ./mnt
-~# df -hT
-Filesystem     Type      Size  Used Avail Use% Mounted on
-...
-/dev/loop0     ext2       93K   14K   74K  16% /root/mnt
-~# cd mnt
-~/mnt# ls -al
-total 17
-drwxr-xr-x 3 root root  1024 Apr 19 20:57 .
-drwx------ 6 root root  4096 Apr 19 20:57 ..
-drwx------ 2 root root 12288 Apr 19 20:57 lost+found
-~/mnt# mkdir sub2
-~/mnt# ls -al
-total 18
-drwxr-xr-x 4 root root  1024 Apr 19 20:58 .
-drwx------ 6 root root  4096 Apr 19 20:57 ..
-drwx------ 2 root root 12288 Apr 19 20:57 lost+found
-drwxr-xr-x 2 root root  1024 Apr 19 20:58 sub2
-~/mnt# cd sub2
-~/mnt/sub2# ls -al
-total 2
-drwxr-xr-x 2 root root 1024 Apr 19 20:58 .
-drwxr-xr-x 4 root root 1024 Apr 19 20:58 ..
-~/mnt/sub2# mkdir sub2.1
-~/mnt/sub2# ls -al
-total 3
-drwxr-xr-x 3 root root 1024 Apr 19 20:58 .
-drwxr-xr-x 4 root root 1024 Apr 19 20:58 ..
-drwxr-xr-x 2 root root 1024 Apr 19 20:58 sub2.1
-~/mnt/sub2# touch file2.1
-~/mnt/sub2# ls -al
-total 3
-drwxr-xr-x 3 root root 1024 Apr 19 20:58 .
-drwxr-xr-x 4 root root 1024 Apr 19 20:58 ..
--rw-r--r-- 1 root root    0 Apr 19 20:58 file2.1
-drwxr-xr-x 2 root root 1024 Apr 19 20:58 sub2.1
-~/mnt/sub2# cd ../../
-~# umount mnt/
-~# losetup --find
-/dev/loop1
-~# losetup --detach /dev/loop0
-~# losetup --find
-/dev/loop0
-~# ls -al mnt/
-total 8
-drwxr-xr-x 2 root root 4096 Apr 19 20:57 .
-drwx------ 6 root root 4096 Apr 19 20:57 ..
-~# 
-exit
+        # mkdir mnt
+        # mount /dev/loop0 ./mnt
+        # df -hT
+        Filesystem     Type      Size  Used Avail Use% Mounted on
+        ...
+        /dev/loop0     ext2       93K   14K   74K  16% /root/mnt
+        # cd mnt
+        # ls -al
+        total 17
+        drwxr-xr-x  3 root root  1024 Apr 21 02:22 .
+        drwxr-xr-x 37 zzj zzj  4096 Apr 21 02:22 ..
+        drwx------  2 root root 12288 Apr 21 02:22 lost+found
+        # mkdir sub2
+        # ls -al
+        total 18
+        drwxr-xr-x  4 root root  1024 Apr 21 02:23 .
+        drwxr-xr-x 37 zzj zzj  4096 Apr 21 02:22 ..
+        drwx------  2 root root 12288 Apr 21 02:22 lost+found
+        drwxr-xr-x  2 root root  1024 Apr 21 02:23 sub2
+        # cd sub2
+        # ls -al
+        total 2
+        drwxr-xr-x 2 root root 1024 Apr 21 02:23 .
+        drwxr-xr-x 4 root root 1024 Apr 21 02:23 ..
+        # mkdir sub2.1
+        # ls -al
+        total 3
+        drwxr-xr-x 3 root root 1024 Apr 21 02:24 .
+        drwxr-xr-x 4 root root 1024 Apr 21 02:23 ..
+        drwxr-xr-x 2 root root 1024 Apr 21 02:24 sub2.1
+        # touch file2.1
+        # ls -al
+        total 3
+        drwxr-xr-x 3 root root 1024 Apr 21 02:24 .
+        drwxr-xr-x 4 root root 1024 Apr 21 02:23 ..
+        -rw-r--r-- 1 root root    0 Apr 21 02:24 file2.1
+        drwxr-xr-x 2 root root 1024 Apr 21 02:24 sub2.1
+        # cd ../../
+        # umount mnt/
+        # losetup --find
+        /dev/loop1
+        # losetup --detach /dev/loop0
+        # losetup --find
+        /dev/loop0
+        # ls -al mnt/
+        total 8
+        drwxr-xr-x  2 root root 4096 Apr 21 02:22 .
+        drwxr-xr-x 37 zzj zzj 4096 Apr 21 02:22 ..
 ```
 
 In the sample session shown above, files and directories are created. Make sure you see the number of links each file or directory has, and make sure you understand why.
@@ -186,7 +178,7 @@ Now that you understand how to use a loop device, mount a loop device and format
 $ dd bs=4096 count=1000 if=/dev/zero of=~/ez_disk.img
 # losetup --find --show ~/ez_disk.img
 ```
-This will create the file `ez_disk.img` and bind it to an available loop device, probably `/dev/loop0`. Now, `/dev/loop0` can be used as if it were a physical disk, and the data backing it will be stored in `ez_disk.img`.
+This will create the file `ez_disk.img` and bind it to an available loop device, probably `/dev/loop12`. Now, `/dev/loop12` can be used as if it were a physical disk, and the data backing it will be stored in `ez_disk.img`.
 
 Now format the disk as EZFS. The skeleton code for a formatting utility program is in `format_disk_as_ezfs.c`. Compile it, then run it:
 
@@ -194,15 +186,15 @@ Now format the disk as EZFS. The skeleton code for a formatting utility program 
 # ./format_disk_as_ezfs /dev/loop0 1000
 ```
 
-We have provided you with reference kernel modules that implement EZFS, which are designed to work with your stock Debian 11 kernel (`5.10.205-amd64` and `5.10.205-arm64`). x86 and arm kernel modules are in `ref/ez-x86.ko` and `ref/ez-arm.ko`, respectively. You should familiarize yourself with writing and using [Linux kernel modules](https://columbia-os.github.io/dev-guides/linux-modules.html). You can use the reference kernel module to explore your newly created EZFS by mounting the disk and loading the kernel module:
+We have provided you with reference kernel modules that implement EZFS, which are designed to work with your stock Ubuntu 24.04.1 kernel (`6.8-amd64` and `6.8-arm64`). x86 and arm kernel modules are in `ref/ez-x86.ko` and `ref/ez-arm.ko`, respectively. You should familiarize yourself with writing and using [Linux kernel modules](https://columbia-os.github.io/dev-guides/linux-modules.html). You can use the reference kernel module to explore your newly created EZFS by mounting the disk and loading the kernel module:
 
 ```console
 # mkdir /mnt/ez
 # insmod ez-ARCH.ko
-# mount -t ezfs /dev/loop0 /mnt/ez
+# mount -t ezfs /dev/loop12 /mnt/ez
 ```
 
-where ARCH is either x86 or arm. Now you can create some new files, edit `hello.txt`, etc. If your kernel name is slightly different (e.g. `5.10.205-amd64`), you may get a versioning error when you try to load the kernel module. In that case, you can try forcibly inserting the module with `insmod -f`.
+where ARCH is either x86 or arm. Now you can create some new files, edit `hello.txt`, etc. If your kernel name is slightly different (e.g. `6.8.0-12-amd64`), you may get a versioning error when you try to load the kernel module. In that case, you can try forcibly inserting the module with `insmod -f`.
 
 
 Part 3: Changing the formatting program
@@ -228,11 +220,11 @@ Now that you understand how to manually add files to your file system via your f
 * [Documentation/filesystems/vfs.rst](https://elixir.bootlin.com/linux/v6.1/source/Documentation/filesystems/vfs.rst)
 * [Linux VFS tutorial at lwn.net](https://lwn.net/Articles/57369/)
 
-Note that the VFS has evolved over the years and some functions exist primarily for backwards compatibility with older file system implementations. **In your implementation, you should make sure to use the newer VFS interface functions discussed in class whenever possible.** As always, the best source of correct information is the source code, especially other file system implementations, some of which were described in class, including [ramfs](https://elixir.bootlin.com/linux/v5.10.205/source/fs/ramfs). Other file system implementations are also good references to see what functions you have to implement and which ones you do not have to implement, or can implement by leveraging functions already provided by the VFS.
+Note that the VFS has evolved over the years and some functions exist primarily for backwards compatibility with older file system implementations. **In your implementation, you should make sure to use the newer VFS interface functions discussed in class whenever possible.** As always, the best source of correct information is the source code, especially other file system implementations, some of which were described in class, including [ramfs](https://elixir.bootlin.com/linux/v6.8/source/fs/ramfs). Other file system implementations are also good references to see what functions you have to implement and which ones you do not have to implement, or can implement by leveraging functions already provided by the VFS.
 
 This part of the assignment focuses on writing the code that initializes the file system and enables mounting disks. Create the basic functionality for your file system to work as a kernel module so that it can be loaded and unloaded from the kernel. Then make the `mount` and `umount` commands work cleanly. We won't be reading any files or directories at this time.
 
-The name attribute of your `struct file_system_type` MUST BE **myezfs or ezfs**. _Failure to provide the correct naming of your file system will result in an automatic zero on your grade._
+The name attribute of your `struct file_system_type` MUST BE **myezfs**. _Failure to provide the correct naming of your file system will result in an automatic zero on your grade._
 
 Some Hints:
 
@@ -356,7 +348,7 @@ At this point, you should stress test your EZFS implementation. The rest of this
 Part 8: Writing to existing files
 -------------------------------------
 So far, we've only been reading what's already on the filesystem. Implement functions for modifying the filesystem contents. Again, you should implement `write_iter` instead of `write`.
-Read `generic_file_write_iter`, try to understand how it helps us to write iteratively, and find out how it interacts with `address_space_operations`. Do we need to worry about changing the length of the file ourselves? How about time accounting and `inode->i_blocks`? It seems that only `write_begin` and `write_end` are called in `generic_file_write_iter`. When is `writepage` called? What's the benefit of doing so? Referring to BFS's [file.c](https://elixir.bootlin.com/linux/v6.1/source/fs/bfs/file.c), implement `ezfs_writepage` and `ezfs_write_begin`. We recommend you first make sure your write functionality works for a file that requires no more than one data block for its contents. Test for writing the contents of files:
+Read `generic_file_write_iter`, try to understand how it helps us to write iteratively, and find out how it interacts with `address_space_operations`. Do we need to worry about changing the length of the file ourselves? How about time accounting and `inode->i_blocks`? It seems that only `write_begin` and `write_end` are called in `generic_file_write_iter`. When is `writepage` called? What's the benefit of doing so? Referring to BFS's [file.c](https://elixir.bootlin.com/linux/v6.8/source/fs/bfs/file.c, implement `ezfs_writepage` and `ezfs_write_begin`. We recommend you first make sure your write functionality works for a file that requires no more than one data block for its contents. Test for writing the contents of files:
 
 ```console
 $ cd /mnt/ez
@@ -373,11 +365,13 @@ Greetings and salutations, w4118!
 Once you have the one block case working, then you should consider what if the file requires more than one block. EZFS only supports index allocation of blocks to a file. As indicated above, the entries in your indirect block should simply be uint64_t stored block numbers. Indirect block entries that are not in use should be zeroed. If either the direct or indirect block entry in the inode are not used, the respective entry should also be zeroed.
 You should also be able to edit files with the `nano` editor, although it will complain about `fsync()` not being implemented. Fix this problem.
 
+In this part, you should also handle writes that shrink files. You may want to refer to ramfs's implementation of [`setattr()`](https://elixir.bootlin.com/linux/v6.8/source/fs/ramfs/file-mmu.c#L53) to figure out how to deal with the truncation of files.
+
 Ensure that changes to the VFS inode are written back to disk. You should do this by implementing `ezfs_write_inode()`. Of course, VFS needs to be informed that the VFS inode is out of sync with the EZFS inode. Test this by unmounting and remounting. Writing to the buffer head only changes the contents in memory. It does not cause those changes to be written back to disk. Be sure to take the appropriate measures so that your modifications are written to disk.
 
-If there is not enough space in your file system to write what you need to write, you should return an appropriate error, specifically [ENOSPC](https://elixir.bootlin.com/linux/v5.10.205/source/include/uapi/asm-generic/errno-base.h#L32). Keep in mind that there may be multiple reasons why there is not enough space.
+If there is not enough space in your file system to write what you need to write, you should return an appropriate error, specifically [ENOSPC](https://elixir.bootlin.com/linux/v6.8/source/include/uapi/asm-generic/errno-base.h#L32). Keep in mind that there may be multiple reasons why there is not enough space.
 
-Until you introduced writing files, you were not really modifying your file system. Now that the file system is being modified, you should take care to make sure that concurrent file operations are being handled properly, if you have not done so already. For example, if two files are being modified at the same time, you want to make sure that you do not accidentally assign the same free data block to both files, which would obviously be an error. Make sure that your EZFS operations work properly when multiple processes or threads are performing those operations at any given time. Keep in mind that buffer head operations such as `sb_bread` may block if they need to go to disk. You may find it helpful to review how synchronization is handled in [BFS](https://elixir.bootlin.com/linux/v5.10.205/source/fs/bfs).
+Until you introduced writing files, you were not really modifying your file system. Now that the file system is being modified, you should take care to make sure that concurrent file operations are being handled properly, if you have not done so already. For example, if two files are being modified at the same time, you want to make sure that you do not accidentally assign the same free data block to both files, which would obviously be an error. Make sure that your EZFS operations work properly when multiple processes or threads are performing those operations at any given time. Keep in mind that buffer head operations such as `sb_bread` may block if they need to go to disk. You may find it helpful to review how synchronization is handled in [BFS](https://elixir.bootlin.com/linux/v6.8/source/fs/bfs).
 
 Part 9: Creating new files
 -------------------------------------
@@ -410,7 +404,7 @@ chad
 BigTime Tommie
 https://youtu.be/TiC8pig6PGE
 ```
-
+Note that the size of an ezfs data block is 4KB, whereas the VFS block size is 512B. When you `stat` a file, the number of blocks should correspond to the VFS block size. Make sure to correctly convert between the two definitions as needed.
 
 Part 10: Deleting files
 -------------------------------------
@@ -511,8 +505,6 @@ At this point, you should make sure that whatever robustness tests you did earli
 
 Submission
 -------------------------------------
-At this point, you should make sure that whatever robustness tests you did earlier continue to pass with your completed file system, and your tests should include having multiple processes or threads perform various file system operations concurrently. In addition, you should try running various programs manipulating the files in your file system.
-
 To submit this part, push the hw8handin tag with the following:
 ```console
 $ git tag -a -m "Completed hw8." hw8handin
