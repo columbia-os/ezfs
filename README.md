@@ -505,11 +505,11 @@ At this point, you should make sure that whatever robustness tests you did earli
 
 Submission
 -------------------------------------
-To submit this part, push the hw8handin tag with the following:
+To submit this part, push the hw7handin tag with the following:
 ```console
-$ git tag -a -m "Completed hw8." hw8handin
+$ git tag -a -m "Completed hw7." hw7handin
 $ git push origin main
-$ git push origin hw8handin
+$ git push origin hw7handin
 ```
 
 --------
