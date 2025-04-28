@@ -186,7 +186,7 @@ Now format the disk as EZFS. The skeleton code for a formatting utility program 
 # ./format_disk_as_ezfs /dev/loop0 1000
 ```
 
-We have provided you with reference kernel modules that implement EZFS, which are designed to work with your stock Ubuntu 24.04.1 kernel (`6.8-amd64` and `6.8-arm64`). x86 and arm kernel modules are in `ref/ez-x86.ko` and `ref/ez-arm.ko`, respectively. You should familiarize yourself with writing and using [Linux kernel modules](https://columbia-os.github.io/dev-guides/linux-modules.html). You can use the reference kernel module to explore your newly created EZFS by mounting the disk and loading the kernel module:
+We have provided you with reference kernel modules that implement EZFS, which are designed to work with your stock Ubuntu 24.04.1 kernel (`6.8.0-amd64` and `6.8.0-48-arm64`). x86 and arm kernel modules are in `ref/ez-x86.ko` and `ref/ez-arm.ko`, respectively. You should familiarize yourself with writing and using [Linux kernel modules](https://columbia-os.github.io/dev-guides/linux-modules.html). You can use the reference kernel module to explore your newly created EZFS by mounting the disk and loading the kernel module:
 
 ```console
 # mkdir /mnt/ez
